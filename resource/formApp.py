@@ -18,9 +18,15 @@ def _load_extras_plugin_config() -> dict:
 
 def do(payload, confic, plugin_config, inputs):
     # Keep the form setup lightweight and config-driven.
-    # Prefer DSS-provided plugin_config; fall back to workspace extras for local dev.
-    effective_plugin_config = plugin_config
+    # Prefer DSS-provided plugin_config. In a deployed plugin, the workspace
+    # extras path typically won't exist, so never fail hard if it's missing.
+    effective_plugin_config = plugin_config or {}
+
     if not effective_plugin_config:
-        effective_plugin_config = _load_extras_plugin_config()
+        try:
+            if _EXTRAS_PLUGIN_CONFIG_PATH.exists():
+                effective_plugin_config = _load_extras_plugin_config()
+        except (OSError, ValueError, json.JSONDecodeError):
+            effective_plugin_config = {}
 
     return build_form_choices_response(effective_plugin_config)

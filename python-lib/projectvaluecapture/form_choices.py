@@ -29,7 +29,30 @@ def _unwrap_plugin_config(plugin_config: Any) -> dict[str, Any]:
     if "hub_project_name" in plugin_config or any(k.startswith("fc_") for k in plugin_config):
         return plugin_config
 
-    # Wrapper dict: take first inner mapping
+    # Common wrapper key
+    if "param1" in plugin_config and isinstance(plugin_config.get("param1"), dict):
+        return plugin_config["param1"]
+
+    # Pick the first dict-like value
+    for value in plugin_config.values():
+        if isinstance(value, dict):
+            if "hub_project_name" in value or any(k.startswith("fc_") for k in value):
+                return value
+
+    # Sometimes settings get stringified as JSON
+    for value in plugin_config.values():
+        if isinstance(value, str) and value.strip().startswith("{"):
+            try:
+                import json
+
+                parsed = json.loads(value)
+                if isinstance(parsed, dict):
+                    if "hub_project_name" in parsed or any(k.startswith("fc_") for k in parsed):
+                        return parsed
+            except Exception:
+                pass
+
+    # Wrapper dict: take first inner mapping as fallback
     if len(plugin_config) == 1:
         inner = next(iter(plugin_config.values()))
         if isinstance(inner, dict):

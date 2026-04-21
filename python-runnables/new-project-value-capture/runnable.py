@@ -37,7 +37,6 @@ class MyRunnable(Runnable):
         project_title = self.config.get('projName', None)
               
         project_key = ''.join(i for i in project_title if i.isalnum()).upper()
-       
         project_type = self.config.get('projType', None)
         APM_ID = self.config.get('idAPM', None)
         GBU = self.config.get('gbu', None)

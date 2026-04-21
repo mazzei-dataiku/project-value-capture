@@ -7,7 +7,8 @@ This repository contains a Dataiku DSS plugin that provides a runnable (macro) w
 - `python-runnables/new-project-value-capture/runnable.py`: runnable entrypoint (`MyRunnable`).
 - `resource/formParamsTemplate.html`: AngularJS form template.
 - `js/formParamsModule.js`: AngularJS controller logic.
-- `resource/formApp.py`: server-side “form setup” returning choice lists.
+- `resource/formApp.py`: server-side “form setup” returning choice lists from plugin settings (`fc_*`).
+- `parameter-sets/form-choices/parameter-set.json`: plugin parameter set that defines the `fc_*` lists and their default values.
 - `python-lib/`: shared helper code (importable in DSS plugin runtime).
 - `unit_testing/new-project-value-capture.py`: minimal local harness to instantiate and run the runnable.
 
@@ -20,11 +21,19 @@ This workspace uses an “extras” directory to store runnable configs:
 
 `unit_testing/new-project-value-capture.py` loads these two files and passes them as `config` and `plugin_config` to `MyRunnable.__init__`.
 
-### `plugin_config.json` conventions
+### Plugin settings conventions
 
-- Wrapper format: `{ "param1": { ... } }` (workaround for a DSS password-encryption behavior).
-- Form choice lists are stored as top-level lists prefixed with `fc_`:
+- DSS plugin settings are expected to provide the form choice lists as top-level lists prefixed with `fc_`:
   - `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
+- `financial_value_drivers` is the subset of drivers that should use numeric USD input in the form.
+
+**Parameter sets**
+
+- `parameter-sets/form-choices/parameter-set.json` defines the plugin settings UI for these lists and provides `defaultValue` arrays.
+
+**Local dev/testing**
+
+- The workspace extras `plugin_config.json` still uses the wrapper format `{ "param1": { ... } }` as a workaround for a DSS password-encryption behavior.
 - Admin token for DSS macro admin client:
   - `admin_api_token` (defaults to `creation1` if missing)
 

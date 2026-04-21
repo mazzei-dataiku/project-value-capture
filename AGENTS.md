@@ -17,6 +17,7 @@ This repo is a **Dataiku DSS plugin** (macro/runnable + webapp UI) stored under 
 - `js/`: AngularJS module code used by the parameter form (`formParamsModule.js`).
 - `python-lib/`: shared Python library code (importable package).
 - `unit_testing/`: local Code Studio harness script(s) for smoke testing.
+- `parameter-sets/`: plugin parameter set definitions (plugin settings UI / defaults).
 
 ## Environment / Prereqs (Dataiku Code Studio)
 
@@ -36,8 +37,9 @@ This repo uses a workspace-side config directory (not necessarily shipped with t
 
 - Uses a wrapper object like `{ "param1": { ... } }`.
 - The inner object contains values used by the plugin.
-- Current convention stores form choice lists as top-level lists with an `fc_` prefix:
+- Form choice lists are stored as top-level lists with an `fc_` prefix:
   - `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
+- Defaults for these lists are defined in `parameter-sets/form-choices/parameter-set.json` via `defaultValue`.
 - Admin token is stored as `admin_api_token` (defaults to `creation1` if missing).
 
 ## Build / Lint / Test

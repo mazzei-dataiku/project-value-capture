@@ -12,49 +12,108 @@
             "label": "Project Types",
             "type": "STRINGS",
             "description": "Radio options for Project Type",
-            "mandatory": true
+            "mandatory": true,
+            "defaultValue": [
+                "Ad-Hoc",
+                "Industrialization",
+                "POC"
+            ]
         },
         {
             "name": "fc_gbus",
             "label": "GBUs",
             "type": "STRINGS",
             "description": "Dropdown options for GBU",
-            "mandatory": true
+            "mandatory": true,
+            "defaultValue": [
+                "Corp Functions",
+                "Digital",
+                "Gen Med",
+                "Manufacturing and Supply",
+                "R&D",
+                "Specialty Care",
+                "Vaccines"
+            ]
         },
         {
             "name": "fc_business_users",
             "label": "Business Users",
             "type": "STRINGS",
             "description": "Multi-select options for Business Owner (include 'Other')",
-            "mandatory": true
+            "mandatory": true,
+            "defaultValue": [
+                "Alice",
+                "Bob",
+                "Chloe",
+                "Dylan",
+                "Other"
+            ]
         },
         {
             "name": "fc_technical_users",
             "label": "Technical Users",
             "type": "STRINGS",
             "description": "Multi-select options for Technical Owner (include 'Other')",
-            "mandatory": true
+            "mandatory": true,
+            "defaultValue": [
+                "Erica",
+                "Frank",
+                "Gemma",
+                "Hank",
+                "Other"
+            ]
         },
         {
             "name": "fc_value_drivers",
             "label": "Value Drivers",
             "type": "STRINGS",
             "description": "Dropdown options for Value Drivers",
-            "mandatory": true
+            "mandatory": true,
+            "defaultValue": [
+                "Build New Capabilities",
+                "Decrease Costs",
+                "Decrease Time-to-Market",
+                "Differentiate the Company",
+                "Enhance Employee Skills",
+                "Expand Market Share",
+                "Foster a Culture of Innovation",
+                "Improve Customer Satisfaction",
+                "Improve Employee Satisfaction",
+                "Improve Productivity / Efficiency",
+                "Improve Profit Margin",
+                "Improve Regulatory Compliance",
+                "Increase Customer Retention",
+                "Increase Revenue",
+                "Mitigate Operational Risk",
+                "Reduce Error Rates",
+                "Reduce Security Incidents"
+            ]
         },
         {
             "name": "fc_non_fin_impact_levels",
             "label": "Non-Financial Impact Levels",
             "type": "STRINGS",
             "description": "Dropdown options for non-financial impact sizing",
-            "mandatory": true
+            "mandatory": true,
+            "defaultValue": [
+                "Low",
+                "Moderate",
+                "Significant",
+                "Substantial",
+                "Unknown"
+            ]
         },
         {
             "name": "financial_value_drivers",
             "label": "Financial Value Drivers",
             "type": "STRINGS",
             "description": "Subset of Value Drivers that should use numeric USD input",
-            "mandatory": true
+            "mandatory": true,
+            "defaultValue": [
+                "Improve Profit Margin",
+                "Increase Revenue",
+                "Decrease Costs"
+            ]
         }
     ],
     "params": []

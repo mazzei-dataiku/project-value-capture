@@ -8,10 +8,10 @@
     "defaultDefinableAtProjectLevel": false,
     "pluginParams": [
         {
-            "name": "parameter1",
-            "label": "User-readable name",
-            "type": "STRING",
-            "description": "Some documentation for parameter1",
+            "name": "fc_proj_types",
+            "label": "Project Types",
+            "type": "STRINGs",
+            "description": "",
             "mandatory": true
         }
     ],

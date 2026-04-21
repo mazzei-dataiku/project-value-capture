@@ -1,26 +1,11 @@
-/* This file is the descriptor for the parameter set form-choices */
 {
     "meta" : {
-        // label: name of the parameter set as displayed, should be short
         "label": "Parameter set form-choices",
-
-        // description: longer string to help end users understand what these parameter correspond to
         "description": "",
-
-        // icon: must be one of the FontAwesome 5.15.4 icons, complete list here at https://fontawesome.com/v5/docs/
         "icon": "fas fa-puzzle-piece"
     },
-
-    /* if users are allowed to fill the values for an instance of this parameter
-       set directly in the plugin component using it, as opposed to only be allowed
-       to select already defined presets (default value, can be changed in plugin
-       settings)
-    */
-    "defaultDefinableInline": true,
-
-    /* if users are allowed to define presets at the project level in addition
-       to the instance level (default value, can be changed in plugin settings) */
-    "defaultDefinableAtProjectLevel": true,
+    "defaultDefinableInline": false,
+    "defaultDefinableAtProjectLevel": false,
 
 
     /* The field "params" holds a list of all the params

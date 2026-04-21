@@ -1,0 +1,256 @@
+        /* Layout */
+        .custom-app-container {
+            --bg-color: #f4ebfa; 
+            --card-bg: #ffffff;
+            --primary-color: #7A00E6; 
+            --text-main: #333333;
+            --text-muted: #6c757d;
+            --btn-muted: #9ca3af; 
+            --border-color: #dce1e6;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --border-radius: 8px;
+
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px 15px;
+
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Replaces the gap between the two main cards */
+        .custom-app-container > * {
+            margin-bottom: 20px;
+        }
+        .custom-app-container > *:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Cards */
+        .custom-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .custom-card-header {
+            background-color: #f8f9fa;
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .custom-card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .custom-card-header h3 span {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .custom-card-body {
+            padding: 20px;
+        }
+
+        /* Form Elements - High specificity to override Dataiku defaults */
+        .custom-app-container .custom-form-group {
+            padding-top: 10px !important;
+            padding-bottom: 15px !important;
+            margin-bottom: 0 !important;
+        }
+
+        .custom-app-container .custom-form-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+            padding-top: 10px !important;
+            padding-bottom: 15px !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* Forces side-by-side elements and prevents double-spacing inside the row */
+        .custom-app-container .custom-form-row .custom-form-group.custom-half-width {
+            width: 48% !important;
+            padding-bottom: 0 !important; 
+            padding-top: 0 !important;
+        }
+
+        .custom-app-container label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .custom-app-container .custom-other-input-container {
+            display: block;
+            width: 100% !important;
+            margin-top: 8px;
+            clear: both;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+       /* Ensure bootstrap-select wrapper respects the layout width */
+        .custom-app-container .bootstrap-select {
+            width: 100% !important;
+        }
+
+        /* Constrain the expanded dropdown menu to match the width of its input box */
+        .custom-app-container .bootstrap-select .dropdown-menu {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+
+        /* Inputs & Selects styled to match your 27px preference (including Dataiku dropdowns) */
+        .custom-app-container input[type="string"],
+        .custom-app-container input[type="text"],
+        .custom-app-container select,
+        .custom-app-container .bootstrap-select > button {
+            width: 100%;
+            height: 27px !important; /* Adjusted to 27px */
+            padding: 0 10px !important; /* Adjusted to keep text vertically centered */
+            border: 1px solid var(--border-color) !important;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            line-height: 25px !important; /* 27px height - 2px for borders */
+            background-color: white !important;
+            box-shadow: none !important;
+        }
+
+        /* Textarea styled separately so it isn't restricted */
+        .custom-app-container textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            height: 100px !important; /* Reverted back to 100px */
+            resize: vertical;
+        }
+
+        .custom-app-container input:focus, .custom-app-container textarea:focus, .custom-app-container select:focus, .custom-app-container .bootstrap-select > button:focus {
+            outline: none !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(122, 0, 230, 0.15) !important; /* Adjusted focus shadow to match new primary */
+        }
+
+        /* Radios (No Gap Property) */
+        .custom-radio-group {
+            display: flex;
+            padding: 4px 0;
+        }
+
+        .custom-radio-option {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            cursor: pointer;
+        }
+
+        /* Removes the margin from the very last radio option */
+        .custom-radio-group .custom-radio-option:last-child {
+            margin-right: 0;
+        }
+
+        .custom-radio-option input[type="radio"] {
+            margin-right: 6px; 
+        }
+
+        /* Hidden Section Animation */
+        .custom-hidden-section {
+            background: #fdfdfe;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
+            margin-top: 5px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .custom-hidden-section > div {
+            margin-bottom: 15px !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tables */
+        .custom-data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            table-layout: fixed; /* Forces tables to respect explicit column widths */
+        }
+
+        /* Enforce consistent column widths across both tables */
+        .custom-data-table th:nth-child(1) { width: 42%; }
+        .custom-data-table th:nth-child(2) { width: 42%; }
+        .custom-data-table th:nth-child(3) { width: 16%; }
+
+        .custom-data-table th, .custom-data-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .custom-data-table th {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        /* Action Buttons */
+        .custom-action-cell {
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .custom-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s, transform 0.1s;
+            margin: 0 2px;
+            vertical-align: middle;
+        }
+
+        .custom-action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .custom-action-btn:hover {
+            opacity: 0.85;
+        }
+
+        .custom-add-btn { background-color: var(--btn-muted); }
+        .custom-delete-btn { background-color: var(--btn-muted); font-size: 1.2rem;}

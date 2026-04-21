@@ -1,0 +1,37 @@
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+
+def _load_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def main() -> None:
+    base_dir = Path(__file__).resolve().parents[1]
+
+    # Make plugin code importable (DSS runtime normally does this).
+    sys.path.insert(0, str(base_dir / "python-lib"))
+    sys.path.insert(0, str(base_dir / "python-runnables" / "new-project-value-capture"))
+
+    from runnable import MyRunnable  # noqa: E402
+
+    configs_dir = Path(
+        "/home/dataiku/workspace/project-lib-versioned/python/project-value-capture.extras/"
+        "runnable-configs"
+    )
+    config = _load_json(configs_dir / "config.json")
+    plugin_config = _load_json(configs_dir / "plugin_config.json")
+
+    try:
+        runnable = MyRunnable(project_key="DATA_COLLECTION", config=config, plugin_config=plugin_config)
+        print(runnable.run(lambda _: None))
+    except FileNotFoundError as e:
+        # Expected outside the DSS macro runtime.
+        print(e)
+
+
+if __name__ == "__main__":
+    main()

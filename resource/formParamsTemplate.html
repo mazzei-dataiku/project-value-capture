@@ -122,12 +122,12 @@
                                     
                                     <td>
                                         <input type="number" 
-                                               ng-if="(driver.driver == 'Improve Profit Margin' || driver.driver == 'Increase Revenue' || driver.driver == 'Decrease Costs')" 
+                                               ng-if="financialValueDrivers.includes(driver.driver)" 
                                                ng-model="config.impacts[$index].impact" 
                                                placeholder="Enter value in USD ($)">
                                     
                                         <select dku-bs-select="{liveSearch:true}" 
-                                                ng-if="(driver.driver != 'Improve Profit Margin' && driver.driver != 'Increase Revenue' && driver.driver != 'Decrease Costs')" 
+                                                ng-if="!financialValueDrivers.includes(driver.driver)" 
                                                 ng-model="config.impacts[$index].impact"
                                                 ng-options="o for o in nonFinImpactOptions">
                                         </select>

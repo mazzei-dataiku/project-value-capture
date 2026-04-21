@@ -1,0 +1,30 @@
+{
+  "projName": "Example Intake Project",
+  "projType": "Industrialization",
+  "idAPM": "APM-12345",
+  "gbu": "Digital",
+  "finalBusinessOwners": [
+    "Alice"
+  ],
+  "finalTechnicalOwners": [
+    "Erica"
+  ],
+  "problemStatement": "Example problem statement for local testing",
+  "solutionDescription": "Example solution description for local testing",
+  "finalZippedLinks": [
+    {
+      "label": "Jira",
+      "url": "https://example.invalid/jira"
+    }
+  ],
+  "finalZippedDrivers": [
+    {
+      "driver": "Increase Revenue",
+      "impact": 100000
+    },
+    {
+      "driver": "Improve Customer Satisfaction",
+      "impact": "Significant"
+    }
+  ]
+}

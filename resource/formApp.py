@@ -1,21 +1,19 @@
+from __future__ import annotations
+
 import dataiku
+
 from dataiku.runnables import utils
 
+from projectvaluecapture.config import load_plugin_config_from_path
+from projectvaluecapture.form_choices import as_choices_dict
+
+
 def do(payload, confic, plugin_config, inputs):
-    user_client = dataiku.api_client()
-    user_auth_info = user_client.get_auth_info()
-    admin_client = utils.get_admin_dss_client("data_fetch", user_auth_info)
-    
-    value_proj = admin_client.get_project('PROJECTVALUEHUB')
-    params_df = value_proj.get_dataset("all_parameters").get_as_core_dataset().get_dataframe()
-    
-    choices = dict()
-    choices['projTypes'] = list(params_df['project_types'].dropna().unique())
-    choices['GBUs'] = list(params_df['GBUs'].dropna().unique())
-    choices['businessUsers'] = list(params_df['business_user_displayname'].dropna().unique())
-    choices['technicalUsers'] = list(params_df['technical_user_displayname'].dropna().unique())
-    choices['valueDrivers'] = list(params_df['value_driver'].dropna().unique())
-    choices['nonFinImpactSize'] = list(params_df['nonfinancial_impact_level'].dropna().unique())
-    
+    # Keep the form setup lightweight and config-driven.
+    # Do not reach into DSS projects/datasets here.
+    cfg = load_plugin_config_from_path()
+
+    choices = as_choices_dict(cfg.form_choices)
+    choices["financialValueDrivers"] = cfg.financial_value_drivers
+
     return choices
-    

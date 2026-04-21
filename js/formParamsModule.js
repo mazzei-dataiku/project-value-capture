@@ -16,6 +16,11 @@ app.controller('projectController', function($scope) {
             $scope.usersB = data.technicalUsers;
             $scope.driverOptions = data.valueDrivers;
             $scope.nonFinImpactOptions = data.nonFinImpactSize;
+            $scope.financialValueDrivers = data.financialValueDrivers || [];
+
+            // Safety: ensure 'Other' exists even if backend forgot it
+            if ($scope.usersA.indexOf('Other') === -1) $scope.usersA.push('Other');
+            if ($scope.usersB.indexOf('Other') === -1) $scope.usersB.push('Other');
         }, function(data) {
             $scope.projTypes = [];
             $scope.gbuOptions = [];
@@ -23,6 +28,7 @@ app.controller('projectController', function($scope) {
             $scope.usersB = [];
             $scope.driverOptions = [];
             $scope.nonFinImpactOptions = [];
+            $scope.financialValueDrivers = [];
         });
     };
     
@@ -61,17 +67,21 @@ app.controller('projectController', function($scope) {
       };
 
     $scope.zippedLinks = function() {
-        let newLinks = {};
-        
+        let newLinks = [];
+
         $scope.config.labels.forEach((item, index) => {
-            // Check if corresponding index exists in arr2 to avoid errors
-            if ($scope.config.links[index]) {
-                newLinks[item.label] = $scope.config.links[index].link;
+            if (!item || !item.label || item.label.trim() === '') {
+                return;
             }
-            else {
-              newLinks[item.label] = "";
+
+            let url = '';
+            if ($scope.config.links[index] && $scope.config.links[index].link) {
+                url = $scope.config.links[index].link;
             }
+
+            newLinks.push({ label: item.label.trim(), url: (url || '').trim() });
         });
+
         return newLinks;
     };
     
@@ -101,19 +111,21 @@ app.controller('projectController', function($scope) {
     };
 
     $scope.zippedDrivers = function() {
-        let newDrivers = {};
-        
+        let newDrivers = [];
+
         $scope.config.drivers.forEach((item, index) => {
-            // Check if corresponding index exists in arr2 to avoid errors
-            if (item.driver && item.driver !=="") {
-                if ($scope.config.impacts[index]) {
-                newDrivers[item.driver] = $scope.config.impacts[index].impact;
-                }
-                else {
-                  newDrivers[item.driver] = "";
-                }
+            if (!item || !item.driver || item.driver.trim() === '') {
+                return;
             }
+
+            let impact = '';
+            if ($scope.config.impacts[index]) {
+                impact = $scope.config.impacts[index].impact;
+            }
+
+            newDrivers.push({ driver: item.driver.trim(), impact: impact });
         });
+
         return newDrivers;
     };
     

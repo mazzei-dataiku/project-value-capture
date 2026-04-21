@@ -19,7 +19,7 @@ def _load_extras_plugin_config() -> dict:
 def do(payload, confic, plugin_config, inputs):
     # Keep the form setup lightweight and config-driven.
     # Prefer DSS-provided plugin_config. In some DSS contexts the plugin config
-    # may be empty; fall back to the workspace extras file for testing.
+    # may be empty; fall back to the workspace extras file for local dev.
     effective_plugin_config = plugin_config or {}
 
     choices = build_form_choices_response(effective_plugin_config)
@@ -31,6 +31,14 @@ def do(payload, confic, plugin_config, inputs):
             if _EXTRAS_PLUGIN_CONFIG_PATH.exists():
                 choices = build_form_choices_response(_load_extras_plugin_config())
         except (OSError, ValueError, json.JSONDecodeError):
-            pass
+            choices = {}
+
+    if not choices.get("projTypes"):
+        raise Exception(
+            "Plugin settings are missing form choice lists. "
+            "Configure the plugin global settings (plugin_config) with keys like "
+            "fc_proj_types, fc_gbus, fc_business_users, fc_technical_users, "
+            "fc_value_drivers, fc_non_fin_impact_levels."
+        )
 
     return choices

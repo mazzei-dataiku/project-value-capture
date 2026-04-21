@@ -11,7 +11,49 @@
             "name": "fc_proj_types",
             "label": "Project Types",
             "type": "STRINGS",
-            "description": "",
+            "description": "Radio options for Project Type",
+            "mandatory": true
+        },
+        {
+            "name": "fc_gbus",
+            "label": "GBUs",
+            "type": "STRINGS",
+            "description": "Dropdown options for GBU",
+            "mandatory": true
+        },
+        {
+            "name": "fc_business_users",
+            "label": "Business Users",
+            "type": "STRINGS",
+            "description": "Multi-select options for Business Owner (include 'Other')",
+            "mandatory": true
+        },
+        {
+            "name": "fc_technical_users",
+            "label": "Technical Users",
+            "type": "STRINGS",
+            "description": "Multi-select options for Technical Owner (include 'Other')",
+            "mandatory": true
+        },
+        {
+            "name": "fc_value_drivers",
+            "label": "Value Drivers",
+            "type": "STRINGS",
+            "description": "Dropdown options for Value Drivers",
+            "mandatory": true
+        },
+        {
+            "name": "fc_non_fin_impact_levels",
+            "label": "Non-Financial Impact Levels",
+            "type": "STRINGS",
+            "description": "Dropdown options for non-financial impact sizing",
+            "mandatory": true
+        },
+        {
+            "name": "financial_value_drivers",
+            "label": "Financial Value Drivers",
+            "type": "STRINGS",
+            "description": "Subset of Value Drivers that should use numeric USD input",
             "mandatory": true
         }
     ],

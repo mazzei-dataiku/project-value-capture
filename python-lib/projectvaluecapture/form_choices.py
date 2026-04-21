@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from projectvaluecapture.config import get_list, unwrap_plugin_config
 
 
 def ensure_other_choice(values: list[str]) -> list[str]:
@@ -22,15 +21,39 @@ def ensure_other_choice(values: list[str]) -> list[str]:
     return out
 
 
+def _unwrap_plugin_config(plugin_config: Any) -> dict[str, Any]:
+    if not isinstance(plugin_config, dict) or not plugin_config:
+        return {}
+
+    # Flat dict
+    if "hub_project_name" in plugin_config or any(k.startswith("fc_") for k in plugin_config):
+        return plugin_config
+
+    # Wrapper dict: take first inner mapping
+    if len(plugin_config) == 1:
+        inner = next(iter(plugin_config.values()))
+        if isinstance(inner, dict):
+            return inner
+
+    return plugin_config
+
+
+def _get_list(cfg: dict[str, Any], key: str) -> list[str]:
+    value = cfg.get(key)
+    if not isinstance(value, list):
+        return []
+    return [v.strip() for v in value if isinstance(v, str) and v.strip()]
+
+
 def build_form_choices_response(plugin_config: Any) -> dict[str, Any]:
-    cfg = unwrap_plugin_config(plugin_config)
+    cfg = _unwrap_plugin_config(plugin_config)
 
     return {
-        "projTypes": get_list(cfg, "fc_proj_types"),
-        "GBUs": get_list(cfg, "fc_gbus"),
-        "businessUsers": ensure_other_choice(get_list(cfg, "fc_business_users")),
-        "technicalUsers": ensure_other_choice(get_list(cfg, "fc_technical_users")),
-        "valueDrivers": get_list(cfg, "fc_value_drivers"),
-        "nonFinImpactSize": get_list(cfg, "fc_non_fin_impact_levels"),
-        "financialValueDrivers": get_list(cfg, "financial_value_drivers"),
+        "projTypes": _get_list(cfg, "fc_proj_types"),
+        "GBUs": _get_list(cfg, "fc_gbus"),
+        "businessUsers": ensure_other_choice(_get_list(cfg, "fc_business_users")),
+        "technicalUsers": ensure_other_choice(_get_list(cfg, "fc_technical_users")),
+        "valueDrivers": _get_list(cfg, "fc_value_drivers"),
+        "nonFinImpactSize": _get_list(cfg, "fc_non_fin_impact_levels"),
+        "financialValueDrivers": _get_list(cfg, "financial_value_drivers"),
     }

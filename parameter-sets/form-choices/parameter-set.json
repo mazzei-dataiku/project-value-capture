@@ -75,11 +75,20 @@
             ]
         },
         {
+            "name": "fc_gbus_enabled",
+            "label": "Enable GBUs",
+            "type": "BOOLEAN",
+            "description": "If disabled, hides the GBU field in the macro form",
+            "mandatory": true,
+            "defaultValue": true
+        },
+        {
             "name": "fc_gbus",
             "label": "GBUs",
             "type": "STRINGS",
             "description": "Dropdown options for GBU",
-            "mandatory": true,
+            "mandatory": false,
+            "visibilityCondition": "model.fc_gbus_enabled",
             "defaultValue": [
                 "Corp Functions",
                 "Digital",
@@ -91,11 +100,20 @@
             ]
         },
         {
+            "name": "fc_business_users_enabled",
+            "label": "Enable Business Users",
+            "type": "BOOLEAN",
+            "description": "If disabled, hides the Business Owner field in the macro form",
+            "mandatory": true,
+            "defaultValue": true
+        },
+        {
             "name": "fc_business_users",
             "label": "Business Users",
             "type": "STRINGS",
             "description": "Multi-select options for Business Owner (include 'Other')",
-            "mandatory": true,
+            "mandatory": false,
+            "visibilityCondition": "model.fc_business_users_enabled",
             "defaultValue": [
                 "Alice",
                 "Bob",
@@ -105,11 +123,20 @@
             ]
         },
         {
+            "name": "fc_technical_users_enabled",
+            "label": "Enable Technical Users",
+            "type": "BOOLEAN",
+            "description": "If disabled, hides the Technical Owner field in the macro form",
+            "mandatory": true,
+            "defaultValue": true
+        },
+        {
             "name": "fc_technical_users",
             "label": "Technical Users",
             "type": "STRINGS",
             "description": "Multi-select options for Technical Owner (include 'Other')",
-            "mandatory": true,
+            "mandatory": false,
+            "visibilityCondition": "model.fc_technical_users_enabled",
             "defaultValue": [
                 "Erica",
                 "Frank",
@@ -119,11 +146,20 @@
             ]
         },
         {
+            "name": "fc_value_drivers_enabled",
+            "label": "Enable Value Drivers",
+            "type": "BOOLEAN",
+            "description": "If disabled, hides the Value Drivers section in the macro form",
+            "mandatory": true,
+            "defaultValue": true
+        },
+        {
             "name": "fc_value_drivers",
             "label": "Value Drivers",
             "type": "STRINGS",
             "description": "Dropdown options for Value Drivers",
-            "mandatory": true,
+            "mandatory": false,
+            "visibilityCondition": "model.fc_value_drivers_enabled",
             "defaultValue": [
                 "Build New Capabilities",
                 "Decrease Costs",
@@ -145,11 +181,20 @@
             ]
         },
         {
+            "name": "fc_non_fin_impact_levels_enabled",
+            "label": "Enable Non-Financial Impact Levels",
+            "type": "BOOLEAN",
+            "description": "If disabled, replaces non-fin impact dropdown with a free-text input",
+            "mandatory": true,
+            "defaultValue": true
+        },
+        {
             "name": "fc_non_fin_impact_levels",
             "label": "Non-Financial Impact Levels",
             "type": "STRINGS",
             "description": "Dropdown options for non-financial impact sizing",
-            "mandatory": true,
+            "mandatory": false,
+            "visibilityCondition": "model.fc_non_fin_impact_levels_enabled",
             "defaultValue": [
                 "Low",
                 "Moderate",
@@ -159,11 +204,20 @@
             ]
         },
         {
+            "name": "financial_value_drivers_enabled",
+            "label": "Enable Financial Value Drivers",
+            "type": "BOOLEAN",
+            "description": "If disabled, treats all value drivers as non-financial",
+            "mandatory": true,
+            "defaultValue": true
+        },
+        {
             "name": "financial_value_drivers",
             "label": "Financial Value Drivers",
             "type": "STRINGS",
             "description": "Subset of Value Drivers that should use numeric USD input",
-            "mandatory": true,
+            "mandatory": false,
+            "visibilityCondition": "model.financial_value_drivers_enabled",
             "defaultValue": [
                 "Improve Profit Margin",
                 "Increase Revenue",

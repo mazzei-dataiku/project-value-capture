@@ -40,14 +40,14 @@
                             <input type="string" ng-model="config.idAPM" placeholder="APM ID from system">
                         </div>
                         
-                        <div class="custom-form-group custom-half-width">
+                        <div class="custom-form-group custom-half-width" ng-if="fc_gbus_enabled">
                             <label>GBU:</label> 
                             <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options='g for g in gbuOptions' /> 
                         </div>
                     </div>
                     
                     <div class="custom-form-row">
-                        <div class="custom-form-group custom-half-width">
+                        <div class="custom-form-group custom-half-width" ng-if="fc_business_users_enabled">
                             <label>Business Owner:</label> 
                             <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.businessOwner" ng-options="u for u in usersA"></select> 
                         
@@ -57,7 +57,7 @@
                             </div>
                         </div>
                         
-                        <div class="custom-form-group custom-half-width">
+                        <div class="custom-form-group custom-half-width" ng-if="fc_technical_users_enabled">
                             <label>Technical Owner:</label> 
                             <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.technicalOwner" ng-options="u for u in usersB"></select> 
                             <div class = "custom-form-group custom-other-input-container" ng-show="config.technicalOwner.includes('Other')">
@@ -101,7 +101,7 @@
                         </table>
                     </div>
 
-                    <div class="custom-form-group">
+                    <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
                         <label>Value Drivers</label>
                         <table cellspacing="0" class="custom-data-table">
                             <thead>
@@ -122,14 +122,15 @@
                                     
                                     <td>
                                         <input type="number" 
-                                               ng-if="financialValueDrivers.includes(driver.driver)" 
+                                               ng-if="financial_value_drivers_enabled && financialValueDrivers.includes(driver.driver)" 
                                                ng-model="config.impacts[$index].impact" 
                                                placeholder="Enter value in USD ($)">
                                     
                                         <select dku-bs-select="{liveSearch:true}" 
-                                                ng-if="!financialValueDrivers.includes(driver.driver)" 
+                                                ng-if="!financial_value_drivers_enabled || !financialValueDrivers.includes(driver.driver)" 
                                                 ng-model="config.impacts[$index].impact"
-                                                ng-options="o for o in nonFinImpactOptions">
+                                                ng-options="o for o in nonFinImpactOptions"
+                                                ng-disabled="!fc_non_fin_impact_levels_enabled">
                                         </select>
                                     </td>
                                     

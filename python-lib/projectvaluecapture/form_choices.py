@@ -68,15 +68,38 @@ def _get_list(cfg: dict[str, Any], key: str) -> list[str]:
     return [v.strip() for v in value if isinstance(v, str) and v.strip()]
 
 
+def _get_bool(cfg: dict[str, Any], key: str, default: bool = True) -> bool:
+    value = cfg.get(key, default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y"}
+    if isinstance(value, int):
+        return value != 0
+    return default
+
+
 def build_form_choices_response(plugin_config: Any) -> dict[str, Any]:
     cfg = _unwrap_plugin_config(plugin_config)
 
     return {
         "projTypes": _get_list(cfg, "fc_proj_types"),
+
+        "fc_gbus_enabled": _get_bool(cfg, "fc_gbus_enabled", True),
         "GBUs": _get_list(cfg, "fc_gbus"),
+
+        "fc_business_users_enabled": _get_bool(cfg, "fc_business_users_enabled", True),
         "businessUsers": ensure_other_choice(_get_list(cfg, "fc_business_users")),
+
+        "fc_technical_users_enabled": _get_bool(cfg, "fc_technical_users_enabled", True),
         "technicalUsers": ensure_other_choice(_get_list(cfg, "fc_technical_users")),
+
+        "fc_value_drivers_enabled": _get_bool(cfg, "fc_value_drivers_enabled", True),
         "valueDrivers": _get_list(cfg, "fc_value_drivers"),
+
+        "fc_non_fin_impact_levels_enabled": _get_bool(cfg, "fc_non_fin_impact_levels_enabled", True),
         "nonFinImpactSize": _get_list(cfg, "fc_non_fin_impact_levels"),
+
+        "financial_value_drivers_enabled": _get_bool(cfg, "financial_value_drivers_enabled", True),
         "financialValueDrivers": _get_list(cfg, "financial_value_drivers"),
     }

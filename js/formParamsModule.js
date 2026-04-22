@@ -11,11 +11,23 @@ app.controller('projectController', function($scope) {
         $scope.callPythonDo({}).then(function(data) {
             // success
             $scope.projTypes = data.projTypes;
+
+            $scope.fc_gbus_enabled = data.fc_gbus_enabled !== false;
             $scope.gbuOptions = data.GBUs;
+
+            $scope.fc_business_users_enabled = data.fc_business_users_enabled !== false;
             $scope.usersA = data.businessUsers;
+
+            $scope.fc_technical_users_enabled = data.fc_technical_users_enabled !== false;
             $scope.usersB = data.technicalUsers;
+
+            $scope.fc_value_drivers_enabled = data.fc_value_drivers_enabled !== false;
             $scope.driverOptions = data.valueDrivers;
+
+            $scope.fc_non_fin_impact_levels_enabled = data.fc_non_fin_impact_levels_enabled !== false;
             $scope.nonFinImpactOptions = data.nonFinImpactSize;
+
+            $scope.financial_value_drivers_enabled = data.financial_value_drivers_enabled !== false;
             $scope.financialValueDrivers = data.financialValueDrivers || [];
 
             // Safety: ensure 'Other' exists even if backend forgot it
@@ -23,11 +35,23 @@ app.controller('projectController', function($scope) {
             if ($scope.usersB.indexOf('Other') === -1) $scope.usersB.push('Other');
         }, function(data) {
             $scope.projTypes = [];
+
+            $scope.fc_gbus_enabled = true;
             $scope.gbuOptions = [];
+
+            $scope.fc_business_users_enabled = true;
             $scope.usersA = [];
+
+            $scope.fc_technical_users_enabled = true;
             $scope.usersB = [];
+
+            $scope.fc_value_drivers_enabled = true;
             $scope.driverOptions = [];
+
+            $scope.fc_non_fin_impact_levels_enabled = true;
             $scope.nonFinImpactOptions = [];
+
+            $scope.financial_value_drivers_enabled = true;
             $scope.financialValueDrivers = [];
         });
     };

@@ -134,7 +134,7 @@ def ensure_hub_project(self):
     if not hub_name:
         raise ValueError("Missing plugin_config.hub_project_name")
 
-    hub_key = build_project_key(hub_name, max_len=64)
+    hub_key = build_project_key(hub_name, max_len=60)
 
     # A get_project() failure isn't always "not found" (could be permissions, networking,
     # invalid key, etc.). Try to detect "missing" by listing projects.
@@ -167,4 +167,4 @@ def ensure_hub_project(self):
 
     # Use fallback creation logic to avoid collisions.
     # Hub projects allow longer keys; they are derived from hub_project_name.
-    return create_project_with_fallback(self, key_max_len=64)
+    return create_project_with_fallback(self, key_max_len=60)

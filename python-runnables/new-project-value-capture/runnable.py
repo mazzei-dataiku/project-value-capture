@@ -14,8 +14,10 @@ class MyRunnable(Runnable):
         self.config = config
         self.plugin_config = plugin_config
 
-        self.admin_client = create_admin_client(plugin_config)
+        # User client is always available; admin client is built in run() once
+        # we have ensured plugin_config is fully populated.
         self.user_client = create_user_client()
+        self.admin_client = None
 
     def get_progress_target(self):
         return None
@@ -29,7 +31,7 @@ class MyRunnable(Runnable):
             if "param1" in self.plugin_config and isinstance(self.plugin_config.get("param1"), dict):
                 target_cfg = self.plugin_config["param1"]
 
-            if not target_cfg.get("hub_project_name"):
+            if not target_cfg.get("hub_project_name") or not target_cfg.get("admin_api_token"):
                 try:
                     plugin = self.user_client.get_plugin("project-value-capture")
                     raw = plugin.get_settings().get_raw()
@@ -46,6 +48,10 @@ class MyRunnable(Runnable):
             target_cfg.setdefault(
                 "hub_project_description", "Central hub for project intake logging"
             )
+
+        # Build admin client only after plugin_config has been hydrated.
+        if self.admin_client is None:
+            self.admin_client = create_admin_client(self.plugin_config)
 
         payload = normalize_payload(self.config or {})
 

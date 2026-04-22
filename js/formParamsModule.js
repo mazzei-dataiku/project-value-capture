@@ -1,19 +1,23 @@
 // --- Angular App Definition ---
-// In DSS runnable custom forms, Angular is bootstrapped by DSS.
-// Ensure the core `ng` module is included so built-ins like `$http` exist.
-const moduleDeps = ['ng'];
+// DSS often pre-creates the runnable params Angular module.
+// Prefer reusing it (it will already depend on the right DSS modules).
+var app;
+try {
+    app = angular.module('formParams');
+} catch (e) {
+    // Fallback (older DSS contexts): create the module with safe defaults.
+    const moduleDeps = ['ng'];
+    ['dataiku.services', 'dataiku.directives'].forEach((dep) => {
+        try {
+            angular.module(dep);
+            moduleDeps.push(dep);
+        } catch (e) {
+            // optional
+        }
+    });
 
-// Dataiku-provided modules vary by DSS context/version; load them if present.
-['dataiku.services', 'dataiku.directives'].forEach((dep) => {
-    try {
-        angular.module(dep);
-        moduleDeps.push(dep);
-    } catch (e) {
-        // optional
-    }
-});
-
-var app = angular.module('formParams', moduleDeps);
+    app = angular.module('formParams', moduleDeps);
+}
 
 app.controller('projectController', function($scope) {
     // DSS runnable param forms provide $scope.config. Create it for safety.

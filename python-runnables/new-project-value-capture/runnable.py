@@ -24,4 +24,9 @@ class MyRunnable(Runnable):
         # Ensure the hub project exists (creates it if missing).
         ensure_hub_project(self)
 
+        # POC runs should not write to the audit log (intake is for tracking real work).
+        project_type = (self.config or {}).get("projType")
+        if project_type == "POC":
+            return {"status": "skipped", "reason": "POC not logged"}
+
         return Exception("Not implemented")

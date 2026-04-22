@@ -11,12 +11,11 @@
             "name": "fc_proj_types",
             "label": "Project Types",
             "type": "STRINGS",
-            "description": "Radio options for Project Type",
+            "description": "Radio options for Project Type (POC is auto-added by the plugin and is not logged)",
             "mandatory": true,
             "defaultValue": [
                 "Ad-Hoc",
-                "Industrialization",
-                "POC"
+                "Industrialization"
             ]
         },
         {

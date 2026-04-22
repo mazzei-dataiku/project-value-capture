@@ -47,7 +47,15 @@ def create_admin_client(plugin_config: Any) -> dataikuapi.DSSClient:
     if not isinstance(api_key, str) or not api_key.strip():
         raise ValueError("Missing plugin config: admin_api_token")
 
-    return dataikuapi.DSSClient(build_dss_host(), api_key=api_key.strip(), no_check_certificate=True)
+    api_key = api_key.strip()
+    if api_key.startswith("e:AES:"):
+        raise ValueError(
+            "admin_api_token appears encrypted (e:AES:...). "
+            "The runnable must receive a decrypted API key value in its plugin_config. "
+            "Check the plugin preset/parameter-set wiring."
+        )
+
+    return dataikuapi.DSSClient(build_dss_host(), api_key=api_key, no_check_certificate=True)
 
 
 def create_user_client():

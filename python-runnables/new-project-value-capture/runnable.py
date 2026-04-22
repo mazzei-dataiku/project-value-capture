@@ -31,14 +31,21 @@ class MyRunnable(Runnable):
             if "param1" in self.plugin_config and isinstance(self.plugin_config.get("param1"), dict):
                 target_cfg = self.plugin_config["param1"]
 
-            if not target_cfg.get("hub_project_name") or not target_cfg.get("admin_api_token"):
+            if not target_cfg.get("hub_project_name"):
+                # Merge non-secret settings from DSS plugin presets.
+                # Note: do NOT hydrate `admin_api_token` from DSS settings here because
+                # password fields are stored encrypted (e:AES:...) in plugin settings.
                 try:
                     plugin = self.user_client.get_plugin("project-value-capture")
                     raw = plugin.get_settings().get_raw()
                     for preset in raw.get("presets", []) or []:
                         pc = preset.get("pluginConfig")
                         if isinstance(pc, dict) and pc.get("hub_project_name"):
-                            target_cfg.update(pc)
+                            for k, v in pc.items():
+                                if k == "admin_api_token":
+                                    continue
+                                if target_cfg.get(k) in (None, "", [], {}):
+                                    target_cfg[k] = v
                             break
                 except Exception:
                     pass
@@ -50,6 +57,8 @@ class MyRunnable(Runnable):
             )
 
         # Build admin client only after plugin_config has been hydrated.
+        # Expect `admin_api_token` to be provided directly in runnable `plugin_config`
+        # (decrypted). DSS plugin settings store PASSWORD values encrypted.
         if self.admin_client is None:
             self.admin_client = create_admin_client(self.plugin_config)
 

@@ -1,7 +1,7 @@
-// 1. The name 'projectValueCaptureParams' MUST match your runnable.json exactly
-var app = angular.module('projectValueCaptureParams', ['dataiku.services']);
+// 1. IMPORTANT: Remove 'dataiku.services' from the brackets []. 
+// This stops the $http error.
+var app = angular.module('projectValueCaptureParams', []);
 
-// 2. The name 'ProjectValueCaptureParamsController' MUST match your HTML ng-controller
 app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope) {
     
     $scope.config = $scope.config || {};
@@ -25,6 +25,7 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
 
     // --- BACKEND HANDSHAKE ---
     var fetchInitChoices = function() {
+        // $scope.callPythonDo is built-in; it doesn't need $http
         $scope.callPythonDo({}).then(function(data) {
             $scope.projTypes = data.projTypes;
             $scope.gbuOptions = data.GBUs;

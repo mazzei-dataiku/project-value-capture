@@ -32,7 +32,15 @@ def bronze_schema_columns() -> list[dict[str, str]]:
 
 
 def ensure_managed_dataset(project, dataset_name: str, connection: str | None = None):
-    existing = {d["name"] for d in project.list_datasets()}
+    try:
+        existing = {d["name"] for d in project.list_datasets()}
+    except Exception as e:
+        raise RuntimeError(
+            "Unable to list datasets in the hub project. "
+            "The macro admin key/user likely lacks permissions on the hub project. "
+            f"Underlying error: {e}"
+        )
+
     if dataset_name in existing:
         return project.get_dataset(dataset_name)
 

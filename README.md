@@ -34,8 +34,8 @@ This workspace uses an “extras” directory to store runnable configs:
 **Local dev/testing**
 
 - The workspace extras `plugin_config.json` still uses the wrapper format `{ "param1": { ... } }` as a workaround for a DSS password-encryption behavior.
-- Admin token for DSS macro admin client:
-  - `admin_api_token` (defaults to `creation1` if missing)
+- Admin API key for DSS admin client:
+  - `admin_api_token` (required; stored as a password)
 
 ## Running the local harness
 
@@ -45,7 +45,7 @@ Use Dataiku’s bundled Python:
 - `/opt/dataiku/pyenv/bin/python unit_testing/new-project-value-capture.py`
 
 Notes:
-- If `runnable.py` calls `utils.get_admin_dss_client(...)`, local execution in Code Studio may fail because DSS macro runtime secrets are not present (missing `shared-secret.txt`). This is expected; the runnable is primarily designed to run inside DSS.
+- The runnable uses a real admin API key from plugin settings. Local execution in Code Studio may still fail if that key is not available in your local extras config.
 
 ## Quick sanity check
 

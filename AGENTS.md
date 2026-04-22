@@ -40,7 +40,7 @@ This repo uses a workspace-side config directory (not necessarily shipped with t
 - Form choice lists are stored as top-level lists with an `fc_` prefix:
   - `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
 - Defaults for these lists are defined in `parameter-sets/form-choices/parameter-set.json` via `defaultValue`.
-- Admin token is stored as `admin_api_token` (defaults to `creation1` if missing).
+- Admin API key is stored as `admin_api_token` (required; no default).
 
 ## Build / Lint / Test
 
@@ -60,7 +60,7 @@ This plugin repo currently ships **no formal test/lint harness** (no `pytest`, `
   - `/opt/dataiku/pyenv/bin/python unit_testing/new-project-value-capture.py`
 
 Notes:
-- `utils.get_admin_dss_client(...)` typically requires a DSS macro runtime with `DIP_HOME` shared secret.
+- The runnable uses a real admin API key from plugin settings; it does not rely on `utils.get_admin_dss_client(...)`.
 - When run locally in Code Studio, the harness may print a `shared-secret.txt` missing error; that’s expected.
 
 ### Running the plugin (DSS)

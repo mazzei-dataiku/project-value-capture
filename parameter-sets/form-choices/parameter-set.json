@@ -18,10 +18,10 @@
         {
             "name": "admin_api_token",
             "label": "Admin API Token",
-            "type": "STRING",
-            "description": "Admin API token identifier used by get_admin_dss_client",
+            "type": "PASSWORD",
+            "description": "Admin API key value used to create an admin DSSClient",
             "mandatory": true,
-            "defaultValue": "creation1"
+            "defaultValue": ""
         },
         {
             "name": "hub_project_name",

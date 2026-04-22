@@ -135,14 +135,20 @@ def ensure_hub_project(self):
     # A get_project() failure isn't always "not found" (could be permissions, networking,
     # invalid key, etc.). Try to detect "missing" by listing projects.
     try:
-        return self.admin_client.get_project(hub_key)
+        project = self.admin_client.get_project(hub_key)
+        # Force an API call to validate permissions early (otherwise failures show up later
+        # when accessing datasets/objects in the hub project).
+        project.get_permissions()
+        return project
     except Exception:
         pass
 
     try:
         existing_keys = {p.get("projectKey") for p in (self.admin_client.list_projects() or [])}
         if hub_key in existing_keys:
-            return self.admin_client.get_project(hub_key)
+            project = self.admin_client.get_project(hub_key)
+            project.get_permissions()
+            return project
     except Exception:
         # If we can't list projects, fall through to a create attempt.
         pass

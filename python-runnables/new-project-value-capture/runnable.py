@@ -3,10 +3,10 @@ from __future__ import annotations
 import dataiku
 from dataiku.runnables import Runnable
 
-from projectvaluecapture.admin_client import set_admin_client
+from projectvaluecapture.client_builder import create_admin_client, create_user_client
 from projectvaluecapture.new_project import create_project_with_fallback, ensure_hub_project
-from projectvaluecapture.old.bronze import append_row, ensure_managed_dataset
-from projectvaluecapture.old.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
+from projectvaluecapture.bronze import append_row, ensure_managed_dataset
+from projectvaluecapture.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
 
 
 class MyRunnable(Runnable):
@@ -14,15 +14,13 @@ class MyRunnable(Runnable):
         self.config = config
         self.plugin_config = plugin_config
 
-        set_admin_client(self)
+        self.admin_client = create_admin_client(plugin_config)
+        self.user_client = create_user_client()
 
     def get_progress_target(self):
         return None
 
     def run(self, progress_callback):
-        # Attach DSS clients used by helper modules.
-        self.user_client = dataiku.api_client()
-
         # Ensure hub settings exist in plugin_config.
         # In some DSS runtimes, runnable plugin_config can be empty even when the
         # plugin settings are filled (values end up in presets/parameter sets).

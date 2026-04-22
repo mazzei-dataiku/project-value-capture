@@ -29,9 +29,6 @@ def _unwrap_plugin_config(plugin_config: Any) -> dict[str, Any]:
     if "hub_project_name" in plugin_config or any(k.startswith("fc_") for k in plugin_config):
         return plugin_config
 
-    # Common wrapper key
-    if "param1" in plugin_config and isinstance(plugin_config.get("param1"), dict):
-        return plugin_config["param1"]
 
     # Pick the first dict-like value
     for value in plugin_config.values():

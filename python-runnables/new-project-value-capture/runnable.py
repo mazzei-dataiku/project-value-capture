@@ -23,36 +23,12 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
-        # Ensure hub settings exist in plugin_config.
-        # In some DSS runtimes, runnable plugin_config can be empty even when the
-        # plugin settings are filled (values end up in presets/parameter sets).
+        # Hub settings are expected to be provided via plugin settings.
+        # This runnable intentionally does not fetch/merge settings from presets.
         if isinstance(self.plugin_config, dict):
-            target_cfg = self.plugin_config
-            if "param1" in self.plugin_config and isinstance(self.plugin_config.get("param1"), dict):
-                target_cfg = self.plugin_config["param1"]
-
-            if not target_cfg.get("hub_project_name"):
-                # Merge non-secret settings from DSS plugin presets.
-                # Note: do NOT hydrate `admin_api_token` from DSS settings here because
-                # password fields are stored encrypted (e:AES:...) in plugin settings.
-                try:
-                    plugin = self.user_client.get_plugin("project-value-capture")
-                    raw = plugin.get_settings().get_raw()
-                    for preset in raw.get("presets", []) or []:
-                        pc = preset.get("pluginConfig")
-                        if isinstance(pc, dict) and pc.get("hub_project_name"):
-                            for k, v in pc.items():
-                                if k == "admin_api_token":
-                                    continue
-                                if target_cfg.get(k) in (None, "", [], {}):
-                                    target_cfg[k] = v
-                            break
-                except Exception:
-                    pass
-
-            target_cfg.setdefault("hub_project_name", "Project Value Hub")
-            target_cfg.setdefault("hub_project_owner", "admin")
-            target_cfg.setdefault(
+            self.plugin_config.setdefault("hub_project_name", "Project Value Hub")
+            self.plugin_config.setdefault("hub_project_owner", "admin")
+            self.plugin_config.setdefault(
                 "hub_project_description", "Central hub for project intake logging"
             )
 
@@ -91,8 +67,6 @@ class MyRunnable(Runnable):
             return {"projectKey": self.project_key, "status": "created", "logged": False}
 
         plugin_cfg = getattr(self, "plugin_config", {}) or {}
-        if isinstance(plugin_cfg, dict) and "param1" in plugin_cfg and isinstance(plugin_cfg.get("param1"), dict):
-            plugin_cfg = plugin_cfg["param1"]
 
         bronze_dataset_name = "projects_intake_bronze"
         if isinstance(plugin_cfg, dict) and isinstance(plugin_cfg.get("bronze_dataset_name"), str):

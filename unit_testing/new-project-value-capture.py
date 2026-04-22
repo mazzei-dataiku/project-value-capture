@@ -6,7 +6,14 @@ from pathlib import Path
 
 
 def _load_json(path: Path) -> dict:
-    return json.loads(path.read_text(encoding="utf-8"))
+    if not path.exists():
+        return {}
+
+    raw = path.read_text(encoding="utf-8").strip()
+    if not raw:
+        return {}
+
+    return json.loads(raw)
 
 
 def main() -> None:

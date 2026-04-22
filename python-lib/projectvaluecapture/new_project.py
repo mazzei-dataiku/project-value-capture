@@ -61,10 +61,6 @@ def _unwrap_plugin_config(plugin_config) -> dict:
     if "hub_project_name" in plugin_config:
         return plugin_config
 
-    # Common wrapper key
-    if "param1" in plugin_config and isinstance(plugin_config.get("param1"), dict):
-        return plugin_config["param1"]
-
     # Wrapper dict: take first inner mapping
     if len(plugin_config) == 1:
         inner = next(iter(plugin_config.values()))
@@ -74,55 +70,14 @@ def _unwrap_plugin_config(plugin_config) -> dict:
     return plugin_config
 
 
-def _load_dss_plugin_settings_config(plugin_id: str) -> dict:
-    """Best-effort read of plugin settings from DSS.
-
-    In some DSS runtimes, the `plugin_config` passed to the runnable may be
-    missing keys (especially when settings are stored in a parameter set preset).
-    """
-
-    try:
-        import dataiku
-
-        client = dataiku.api_client()
-        plugin = client.get_plugin(plugin_id)
-        raw = plugin.get_settings().get_raw()
-
-        candidates = []
-        if isinstance(raw.get("config"), dict):
-            candidates.append(raw["config"])
-        for preset in raw.get("presets", []) or []:
-            pc = preset.get("pluginConfig")
-            if isinstance(pc, dict):
-                candidates.append(pc)
-
-        for cfg in candidates:
-            if "hub_project_name" in cfg:
-                return cfg
-
-        return {}
-    except Exception:
-        return {}
-
-
 def _get_plugin_cfg(self) -> dict:
-    # 1) use runnable-provided plugin_config
-    cfg = _unwrap_plugin_config(getattr(self, "plugin_config", {}) or {})
-    if cfg.get("hub_project_name"):
-        return cfg
-
-    # 2) fall back to DSS plugin settings (parameter sets are often stored there)
-    cfg2 = _load_dss_plugin_settings_config("project-value-capture")
-    if cfg2.get("hub_project_name"):
-        return cfg2
-
-    return cfg
+    return _unwrap_plugin_config(getattr(self, "plugin_config", {}) or {})
 
 
 def ensure_hub_project(self):
     """Ensure the hub project exists, creating it if missing.
 
-    Reads fields from plugin_config (supports wrapper format {"param1": {...}}):
+    Reads fields from plugin_config:
     - hub_project_name
     - hub_project_owner
     - hub_project_description (optional)

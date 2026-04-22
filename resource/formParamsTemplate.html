@@ -1,3 +1,7 @@
+<!--
+  DSS runnable custom parameter form template.
+  This must be an HTML fragment (no <html>/<head>/<body> tags).
+-->
 <link href="/plugins/project-value-capture/resource/style.css" rel="stylesheet" type="text/css">
 
 <div ng-controller="ProjectValueCaptureParamsController" class="custom-app-container">
@@ -8,7 +12,7 @@
 
         <div class="custom-card-body">
             <div class="custom-form-group">
-                <label>Project Name:</label> 
+                <label>Project Name:</label>
                 <input type="text" ng-model="config.projName" placeholder="Your project name" required>
             </div>
 
@@ -16,35 +20,126 @@
                 <label>Project Description (Optional):</label>
                 <textarea ng-model="config.projectDescription" placeholder="Briefly describe your project"></textarea>
             </div>
-            
+
             <div class="custom-form-group">
-                <label>Project Type:</label> 
+                <label>Project Type:</label>
                 <div class="custom-radio-group">
                     <span ng-repeat="n in projTypes" class="custom-radio-option">
                         <input type="radio" name="projType" ng-model="$parent.config.projType" ng-value="n" /> {{n}}
                     </span>
                 </div>
             </div>
-            
+
             <div class="custom-hidden-section" ng-show="config.projType === 'Industrialization' || config.projType === 'Ad-Hoc'">
-                
                 <div class="custom-form-row">
                     <div ng-show="config.projType === 'Industrialization'" class="custom-form-group custom-half-width">
-                        <label>APM ID:</label> 
+                        <label>APM ID:</label>
                         <input type="text" ng-model="config.idAPM" placeholder="APM ID from system">
                     </div>
-                    
-                    <div class="custom-form-group custom-half-width">
-                        <label>GBU:</label> 
+
+                    <div class="custom-form-group custom-half-width" ng-if="fc_gbus_enabled">
+                        <label>GBU:</label>
                         <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options="g for g in gbuOptions"></select>
                     </div>
                 </div>
-                
+
                 <div class="custom-form-row">
-                    <div class="custom-form-group custom-half-width">
-                        <label>Business Owner:</label> 
-                        <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.businessOwner" ng-options="u for u in usersA"></select> 
-                    
-                        <div class="custom-form-group custom-other-input-container" ng-show="config.businessOwner.indexOf('Other') !== -1">
-                             <label>Please Specify:</label>
-                             <input type="text" ng-model="config.
+                    <div class="custom-form-group custom-half-width" ng-if="fc_business_users_enabled">
+                        <label>Business Owner:</label>
+                        <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.businessOwner" ng-options="u for u in usersA"></select>
+
+                        <div class="custom-form-group custom-other-input-container" ng-show="(config.businessOwner || []).indexOf('Other') !== -1">
+                            <label>Please Specify:</label>
+                            <input type="text" ng-model="config.customBusinessOwner" placeholder="Custom business owner name">
+                        </div>
+                    </div>
+
+                    <div class="custom-form-group custom-half-width" ng-if="fc_technical_users_enabled">
+                        <label>Technical Owner:</label>
+                        <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.technicalOwner" ng-options="u for u in usersB"></select>
+
+                        <div class="custom-form-group custom-other-input-container" ng-show="(config.technicalOwner || []).indexOf('Other') !== -1">
+                            <label>Please Specify:</label>
+                            <input type="text" ng-model="config.customTechnicalOwner" placeholder="Custom technical owner name">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="custom-form-group">
+                    <label>Problem Statement:</label>
+                    <textarea ng-model="config.problemStatement" placeholder="Describe the goal of your project"></textarea>
+                </div>
+
+                <div class="custom-form-group">
+                    <label>Solution Description:</label>
+                    <textarea ng-model="config.solutionDescription" placeholder="Describe underlying process or solution for your project"></textarea>
+                </div>
+
+                <div class="custom-form-group">
+                    <label>Relevant Links (Optional)</label>
+                    <table cellspacing="0" class="custom-data-table">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>URL</th>
+                                <th style="text-align: center;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="label in config.labels track by $index">
+                                <td><input type="text" ng-model="label.label" placeholder="e.g. Jira Board, must be unique"></td>
+                                <td><input type="text" ng-model="config.links[$index].link" placeholder="https://..."></td>
+                                <td class="custom-action-cell">
+                                    <div class="custom-action-btn custom-add-btn" ng-click="addLink()">+</div>
+                                    <div class="custom-action-btn custom-delete-btn" ng-click="deleteLink($index)" ng-if="$index > 0">−</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
+                    <label>Value Drivers</label>
+                    <table cellspacing="0" class="custom-data-table">
+                        <thead>
+                            <tr>
+                                <th>Driver</th>
+                                <th>Impact Size</th>
+                                <th style="text-align: center;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="driver in config.drivers track by $index">
+                                <td>
+                                    <select dku-bs-select="{liveSearch:true}"
+                                            ng-model="driver.driver"
+                                            ng-options="d for d in driverOptions">
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input type="number"
+                                           ng-if="financial_value_drivers_enabled && financialValueDrivers.indexOf(driver.driver) !== -1"
+                                           ng-model="config.impacts[$index].impact"
+                                           placeholder="Enter value in USD ($)">
+
+                                    <select dku-bs-select="{liveSearch:true}"
+                                            ng-if="!financial_value_drivers_enabled || financialValueDrivers.indexOf(driver.driver) === -1"
+                                            ng-model="config.impacts[$index].impact"
+                                            ng-options="o for o in nonFinImpactOptions"
+                                            ng-disabled="!fc_non_fin_impact_levels_enabled">
+                                    </select>
+                                </td>
+
+                                <td class="custom-action-cell">
+                                    <div class="custom-action-btn custom-add-btn" ng-click="addDriver()">+</div>
+                                    <div class="custom-action-btn custom-delete-btn" ng-click="deleteDriver($index)" ng-if="$index > 0">−</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

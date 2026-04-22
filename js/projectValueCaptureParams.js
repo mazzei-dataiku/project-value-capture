@@ -1,24 +1,30 @@
 // --- Angular App Definition ---
-// Use a unique module name to avoid collisions with DSS/plugin-dev internals.
-var app;
-try {
-    app = angular.module('projectValueCaptureParams');
-} catch (e) {
-    // Create the module with safe defaults.
-    const moduleDeps = ['ng'];
-    ['dataiku.services', 'dataiku.directives'].forEach((dep) => {
-        try {
-            angular.module(dep);
-            moduleDeps.push(dep);
-        } catch (e) {
-            // optional
-        }
-    });
+// In DSS plugin-dev, `paramsModule` is loaded via RequireJS/AMD and the loader
+// expects a callable module (it will `$injector.invoke(...)` it).
+//
+// To support both plugin-dev (AMD) and installed plugin (plain script) modes,
+// define a registration function and export it when AMD is available.
+function registerProjectValueCaptureParams() {
+    // Use a unique module name to avoid collisions with DSS/plugin-dev internals.
+    var app;
+    try {
+        app = angular.module('projectValueCaptureParams');
+    } catch (e) {
+        // Create the module with safe defaults.
+        const moduleDeps = ['ng'];
+        ['dataiku.services', 'dataiku.directives'].forEach((dep) => {
+            try {
+                angular.module(dep);
+                moduleDeps.push(dep);
+            } catch (e) {
+                // optional
+            }
+        });
 
-    app = angular.module('projectValueCaptureParams', moduleDeps);
-}
+        app = angular.module('projectValueCaptureParams', moduleDeps);
+    }
 
-app.controller('ProjectValueCaptureParamsController', function($scope) {
+    app.controller('ProjectValueCaptureParamsController', function($scope) {
     // DSS runnable param forms provide $scope.config. Create it for safety.
     $scope.config = $scope.config || {};
 
@@ -226,5 +232,14 @@ app.controller('ProjectValueCaptureParamsController', function($scope) {
 
     }, true);
     
-    
-});
+
+    });
+}
+
+if (typeof define === 'function' && define.amd) {
+    define(function() {
+        return registerProjectValueCaptureParams;
+    });
+} else {
+    registerProjectValueCaptureParams();
+}

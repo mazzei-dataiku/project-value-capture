@@ -31,6 +31,44 @@ def bronze_schema_columns() -> list[dict[str, str]]:
     ]
 
 
+def _infer_managed_connection(project) -> str | None:
+    """Infer a connection for managed dataset creation.
+
+    DSS requires an explicit connection for managed dataset creation in many setups.
+    We try to infer it from project variables or existing datasets.
+    """
+
+    # 1) Hub project variables
+    try:
+        variables = project.get_variables() or {}
+        standard = variables.get("standard") or {}
+        default_connection = standard.get("default_connection")
+        if isinstance(default_connection, str) and default_connection.strip():
+            return default_connection.strip()
+    except Exception:
+        pass
+
+    # 2) Reuse the connection of an existing dataset in the hub project
+    try:
+        for dataset in project.list_datasets() or []:
+            name = dataset.get("name")
+            if not isinstance(name, str) or not name.strip():
+                continue
+            try:
+                settings = project.get_dataset(name).get_settings().get_raw() or {}
+                params = settings.get("params") or {}
+                conn = params.get("connection")
+                if isinstance(conn, str) and conn.strip():
+                    return conn.strip()
+            except Exception:
+                continue
+    except Exception:
+        pass
+
+    # 3) Common default connection name
+    return "filesystem_managed"
+
+
 def ensure_managed_dataset(project, dataset_name: str, connection: str | None = None):
     try:
         existing = {d["name"] for d in project.list_datasets()}
@@ -46,15 +84,15 @@ def ensure_managed_dataset(project, dataset_name: str, connection: str | None = 
 
     builder = project.new_managed_dataset(dataset_name)
 
-    if connection:
-        builder.with_store_into(connection)
+    resolved_connection = connection or _infer_managed_connection(project)
+    if isinstance(resolved_connection, str) and resolved_connection.strip():
+        builder.with_store_into(resolved_connection.strip())
     else:
-        # Best-effort fallback; hub projects might not have default_connection set.
-        try:
-            builder.with_store_into(project.get_variables()["standard"]["default_connection"])
-        except Exception:
-            # If no connection can be inferred, let DSS pick the default.
-            pass
+        raise ValueError(
+            "Unable to infer a managed connection for the hub dataset. "
+            "Set the hub project's variable standard.default_connection, "
+            "or configure a connection name in plugin settings."
+        )
 
     dataset = builder.create(overwrite=False)
     settings = dataset.get_settings()

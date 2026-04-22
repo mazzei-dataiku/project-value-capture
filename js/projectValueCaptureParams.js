@@ -1,11 +1,10 @@
 // --- Angular App Definition ---
-// DSS often pre-creates the runnable params Angular module.
-// Prefer reusing it (it will already depend on the right DSS modules).
+// Use a unique module name to avoid collisions with DSS/plugin-dev internals.
 var app;
 try {
-    app = angular.module('formParams');
+    app = angular.module('projectValueCaptureParams');
 } catch (e) {
-    // Fallback (older DSS contexts): create the module with safe defaults.
+    // Create the module with safe defaults.
     const moduleDeps = ['ng'];
     ['dataiku.services', 'dataiku.directives'].forEach((dep) => {
         try {
@@ -16,10 +15,10 @@ try {
         }
     });
 
-    app = angular.module('formParams', moduleDeps);
+    app = angular.module('projectValueCaptureParams', moduleDeps);
 }
 
-app.controller('projectController', function($scope) {
+app.controller('ProjectValueCaptureParamsController', function($scope) {
     // DSS runnable param forms provide $scope.config. Create it for safety.
     $scope.config = $scope.config || {};
 

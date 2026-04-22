@@ -22,7 +22,7 @@
     ],
     
     "paramsTemplate" :    "formParamsTemplate.html",
-    "paramsModule" :      "formParams",
+    "paramsModule" :      "projectValueCaptureParams",
     "paramsPythonSetup" : "formApp.py",
 
     /* list of required permissions on the project to see/run the runnable */

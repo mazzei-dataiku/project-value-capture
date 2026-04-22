@@ -66,7 +66,7 @@ def _infer_managed_connection(project) -> str | None:
         pass
 
     # 3) Common default connection name
-    return "filesystem_managed"
+    return "managed_filesystem"
 
 
 def ensure_managed_dataset(project, dataset_name: str, connection: str | None = None):

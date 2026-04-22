@@ -1,16 +1,17 @@
-// Dataiku Webapp specific global function to get backend URL
-// This is standard in Dataiku and allows JS to know where to send API calls.
-const getBackendUrl = (path) => dataiku.getWebAppBackendUrl(path);
-
 // --- Angular App Definition ---
-// In DSS runnable custom forms, Dataiku's Angular services may be available.
-let moduleDeps = [];
-try {
-    angular.module('dataiku.services');
-    moduleDeps = ['dataiku.services'];
-} catch (e) {
-    moduleDeps = [];
-}
+// In DSS runnable custom forms, Angular is bootstrapped by DSS.
+// Ensure the core `ng` module is included so built-ins like `$http` exist.
+const moduleDeps = ['ng'];
+
+// Dataiku-provided modules vary by DSS context/version; load them if present.
+['dataiku.services', 'dataiku.directives'].forEach((dep) => {
+    try {
+        angular.module(dep);
+        moduleDeps.push(dep);
+    } catch (e) {
+        // optional
+    }
+});
 
 var app = angular.module('formParams', moduleDeps);
 

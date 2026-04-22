@@ -21,6 +21,32 @@ class MyRunnable(Runnable):
         # Attach DSS clients used by helper modules.
         self.user_client = dataiku.api_client()
 
+        # Ensure hub settings exist in plugin_config.
+        # In some DSS runtimes, runnable plugin_config can be empty even when the
+        # plugin settings are filled (values end up in presets/parameter sets).
+        if isinstance(self.plugin_config, dict):
+            target_cfg = self.plugin_config
+            if "param1" in self.plugin_config and isinstance(self.plugin_config.get("param1"), dict):
+                target_cfg = self.plugin_config["param1"]
+
+            if not target_cfg.get("hub_project_name"):
+                try:
+                    plugin = self.user_client.get_plugin("project-value-capture")
+                    raw = plugin.get_settings().get_raw()
+                    for preset in raw.get("presets", []) or []:
+                        pc = preset.get("pluginConfig")
+                        if isinstance(pc, dict) and pc.get("hub_project_name"):
+                            target_cfg.update(pc)
+                            break
+                except Exception:
+                    pass
+
+            target_cfg.setdefault("hub_project_name", "Project Value Hub")
+            target_cfg.setdefault("hub_project_owner", "admin")
+            target_cfg.setdefault(
+                "hub_project_description", "Central hub for project intake logging"
+            )
+
         # Ensure the hub project exists (creates it if missing).
         ensure_hub_project(self)
 

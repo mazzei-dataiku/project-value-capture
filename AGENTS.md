@@ -14,10 +14,11 @@ This repo is a **Dataiku DSS plugin** (macro/runnable + webapp UI) stored under 
   - `formParamsTemplate.html`: AngularJS template for parameters.
   - `style.css`: UI styling.
   - `formApp.py`: Python setup for the parameter form (returns choices).
-- `js/`: AngularJS module code used by the parameter form (`formParamsModule.js`).
+- `js/`: AngularJS module code used by the parameter form (`projectValueCaptureParams.js`).
 - `python-lib/`: shared Python library code (importable package).
+  - `projectvaluecapture/payload.py`: payload normalization + validation.
+  - `projectvaluecapture/bronze.py`: hub bronze dataset create/append.
 - `unit_testing/`: local Code Studio harness script(s) for smoke testing.
-- `parameter-sets/`: plugin parameter set definitions (plugin settings UI / defaults).
 
 ## Environment / Prereqs (Dataiku Code Studio)
 
@@ -39,7 +40,7 @@ This repo uses a workspace-side config directory (not necessarily shipped with t
 - The inner object contains values used by the plugin.
 - Form choice lists are stored as top-level lists with an `fc_` prefix:
   - `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
-- Defaults for these lists are defined in `parameter-sets/form-choices/parameter-set.json` via `defaultValue`.
+- Defaults for these lists are defined in plugin settings (`plugin.json`) via `defaultValue`.
 - Admin API key is stored as `admin_api_token` (required; no default).
 
 ## Build / Lint / Test

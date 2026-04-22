@@ -5,37 +5,44 @@ This repository contains a Dataiku DSS plugin that provides a runnable (macro) w
 ## What’s in this repo
 
 - `python-runnables/new-project-value-capture/runnable.py`: runnable entrypoint (`MyRunnable`).
+- `python-runnables/new-project-value-capture/runnable.json`: runnable descriptor (template/module wiring).
 - `resource/formParamsTemplate.html`: AngularJS form template.
-- `js/formParamsModule.js`: AngularJS controller logic.
+- `js/projectValueCaptureParams.js`: AngularJS controller logic.
 - `resource/formApp.py`: server-side “form setup” returning choice lists from plugin settings (`fc_*`).
-- `parameter-sets/form-choices/parameter-set.json`: plugin parameter set that defines the `fc_*` lists and their default values.
 - `python-lib/`: shared helper code (importable in DSS plugin runtime).
+  - `python-lib/projectvaluecapture/form_choices.py`: maps plugin settings → UI choice lists.
+  - `python-lib/projectvaluecapture/payload.py`: normalizes & validates submitted form payload.
+  - `python-lib/projectvaluecapture/bronze.py`: creates/appends to the hub “bronze” intake log dataset.
 - `unit_testing/new-project-value-capture.py`: minimal local harness to instantiate and run the runnable.
 
-## Local configuration directory
+## Plugin settings
 
-This workspace uses an “extras” directory to store runnable configs:
+Plugin settings are defined in `plugin.json`.
+
+### Form choice lists
+
+Choice lists are expected as top-level lists prefixed with `fc_`:
+
+- `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
+- `financial_value_drivers` is the subset of drivers that should use numeric USD input in the form.
+
+## Local configuration directory (Code Studio)
+
+This workspace can use an “extras” directory to store runnable configs for local execution:
 
 - `/home/dataiku/workspace/project-lib-versioned/python/project-value-capture.extras/runnable-configs/config.json`
 - `/home/dataiku/workspace/project-lib-versioned/python/project-value-capture.extras/runnable-configs/plugin_config.json`
 
-`unit_testing/new-project-value-capture.py` loads these two files and passes them as `config` and `plugin_config` to `MyRunnable.__init__`.
+`unit_testing/new-project-value-capture.py` loads these files and passes them as `config` and `plugin_config` to `MyRunnable.__init__`.
 
-### Plugin settings conventions
+Notes:
+- In DSS runtime, plugin settings are passed in as `plugin_config`.
+- Local extras `plugin_config.json` may use a wrapper format like `{ "param1": { ... } }`.
 
-- DSS plugin settings are expected to provide the form choice lists as top-level lists prefixed with `fc_`:
-  - `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
-- `financial_value_drivers` is the subset of drivers that should use numeric USD input in the form.
+## Troubleshooting
 
-**Parameter sets**
-
-- `parameter-sets/form-choices/parameter-set.json` defines the plugin settings UI for these lists and provides `defaultValue` arrays.
-
-**Local dev/testing**
-
-- The workspace extras `plugin_config.json` still uses the wrapper format `{ "param1": { ... } }` as a workaround for a DSS password-encryption behavior.
-- Admin API key for DSS admin client:
-  - `admin_api_token` (required; stored as a password)
+- **Value Drivers required**: for project type `Ad-Hoc` and `Industrialization`, at least one value driver is required (validated in `python-lib/projectvaluecapture/payload.py`).
+- **Hub bronze dataset creation requires a connection**: managed dataset creation may require an explicit connection; the plugin infers one and falls back to `filesystem_managed` (see `python-lib/projectvaluecapture/bronze.py`).
 
 ## Running the local harness
 
@@ -43,9 +50,6 @@ Use Dataiku’s bundled Python:
 
 - `cd /home/dataiku/workspace/project-lib-versioned/python/project-value-capture`
 - `/opt/dataiku/pyenv/bin/python unit_testing/new-project-value-capture.py`
-
-Notes:
-- The runnable uses a real admin API key from plugin settings. Local execution in Code Studio may still fail if that key is not available in your local extras config.
 
 ## Quick sanity check
 

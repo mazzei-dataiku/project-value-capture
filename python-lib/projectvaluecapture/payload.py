@@ -88,6 +88,38 @@ def _normalize_value_drivers(value: Any) -> list[dict[str, Any]]:
     return out
 
 
+def _fallback_zip_value_drivers(config: dict[str, Any]) -> list[dict[str, Any]] | None:
+    drivers = config.get("drivers")
+    impacts = config.get("impacts")
+
+    if not isinstance(drivers, list):
+        return None
+    if not isinstance(impacts, list):
+        impacts = []
+
+    out: list[dict[str, Any]] = []
+    for idx in range(max(len(drivers), len(impacts))):
+        driver_item = drivers[idx] if idx < len(drivers) else None
+        impact_item = impacts[idx] if idx < len(impacts) else None
+
+        driver_value = None
+        if isinstance(driver_item, dict):
+            driver_value = driver_item.get("driver")
+        elif isinstance(driver_item, str):
+            driver_value = driver_item
+
+        impact_value: Any = None
+        if isinstance(impact_item, dict):
+            impact_value = impact_item.get("impact")
+        else:
+            impact_value = impact_item
+
+        if isinstance(driver_value, str) and driver_value.strip():
+            out.append({"driver": driver_value.strip(), "impact": impact_value})
+
+    return out
+
+
 def normalize_payload(config: dict[str, Any]) -> NormalizedPayload:
     # Required always
     project_name = _require_non_empty_str(config.get("projName"), "projName")
@@ -104,7 +136,12 @@ def normalize_payload(config: dict[str, Any]) -> NormalizedPayload:
     solution_description = _optional_str(config.get("solutionDescription"))
 
     links = _normalize_links(config.get("finalZippedLinks"))
+
     value_drivers = _normalize_value_drivers(config.get("finalZippedDrivers"))
+    if not value_drivers:
+        fallback = _fallback_zip_value_drivers(config)
+        if fallback:
+            value_drivers = fallback
 
     # Mirror existing rules in runnable.py
     if project_type in ["Ad-Hoc", "Industrialization"]:

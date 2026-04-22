@@ -48,14 +48,6 @@
             "defaultValue": "Central hub for project intake logging"
         },
         {
-            "name": "hub_project_folder_id",
-            "label": "Hub Project Folder Id",
-            "type": "STRING",
-            "description": "Optional project folder id for hub project creation",
-            "mandatory": false,
-            "defaultValue": ""
-        },
-        {
             "name": "bronze_dataset_name",
             "label": "Bronze Dataset Name",
             "type": "STRING",

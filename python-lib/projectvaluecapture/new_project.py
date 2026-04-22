@@ -3,7 +3,8 @@ from __future__ import annotations
 import re
 
 
-def build_project_key(project_name: str, suffix: int | None = None, max_len: int = 24) -> str:
+def build_project_key(project_name: str, suffix: int | None = None, max_len: int = 60) -> str:
+    # Keep a conservative base length so we can append "_999" while staying under ~64 chars.
     base = re.sub(r"[^A-Z0-9]", "_", project_name.upper())[:max_len]
     if suffix is not None:
         return f"{base}_{suffix}"
@@ -20,17 +21,20 @@ def try_create_project(self):
     )
 
 
-def create_project_with_fallback(self, key_max_len: int = 24):
+def create_project_with_fallback(self, key_max_len: int = 60):
     # determine default folder if none specified
     if not self.project_folder_id:
         root_folder = self.user_client.get_root_project_folder()
         self.project_folder_id = root_folder.get_default_folder_for_project_creation().id
 
-    # Loop over and try to create project
-    max_attempts = 100
+    # Loop over and try to create project.
+    # Attempt 0 uses the base key, then _1 ... _999.
+    max_attempts = 1000
 
     for attempt in range(max_attempts):
         suffix = None if attempt == 0 else attempt
+        if suffix is not None and suffix > 999:
+            break
         self.project_key = build_project_key(self.project_name, suffix, max_len=key_max_len)
 
         try:

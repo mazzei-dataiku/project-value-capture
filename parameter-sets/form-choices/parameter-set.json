@@ -8,6 +8,62 @@
     "defaultDefinableAtProjectLevel": false,
     "pluginParams": [
         {
+            "name": "admin_client_profile",
+            "label": "Admin Client Profile",
+            "type": "STRING",
+            "description": "Admin client profile name used by the runnable",
+            "mandatory": true,
+            "defaultValue": "admin"
+        },
+        {
+            "name": "admin_api_token",
+            "label": "Admin API Token",
+            "type": "STRING",
+            "description": "Admin API token identifier used by get_admin_dss_client",
+            "mandatory": true,
+            "defaultValue": "creation1"
+        },
+        {
+            "name": "hub_project_name",
+            "label": "Hub Project Name",
+            "type": "STRING",
+            "description": "Display name of the hub project (key is derived from this)",
+            "mandatory": true,
+            "defaultValue": "Project Value Hub"
+        },
+        {
+            "name": "hub_project_owner",
+            "label": "Hub Project Owner",
+            "type": "STRING",
+            "description": "DSS login that owns the hub project",
+            "mandatory": true,
+            "defaultValue": "admin"
+        },
+        {
+            "name": "hub_project_description",
+            "label": "Hub Project Description",
+            "type": "STRING",
+            "description": "Description used when creating the hub project",
+            "mandatory": true,
+            "defaultValue": "Central hub for project intake logging"
+        },
+        {
+            "name": "hub_project_folder_id",
+            "label": "Hub Project Folder Id",
+            "type": "STRING",
+            "description": "Optional project folder id for hub project creation",
+            "mandatory": false,
+            "defaultValue": ""
+        },
+        {
+            "name": "bronze_dataset_name",
+            "label": "Bronze Dataset Name",
+            "type": "STRING",
+            "description": "Dataset name in the hub project for intake audit logging",
+            "mandatory": true,
+            "defaultValue": "projects_intake_bronze"
+        },
+        {
             "name": "fc_proj_types",
             "label": "Project Types",
             "type": "STRINGS",

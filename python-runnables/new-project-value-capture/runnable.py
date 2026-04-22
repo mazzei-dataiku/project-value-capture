@@ -57,9 +57,13 @@ class MyRunnable(Runnable):
             )
 
         # Build admin client only after plugin_config has been hydrated.
-        # Expect `admin_api_token` to be provided directly in runnable `plugin_config`
-        # (decrypted). DSS plugin settings store PASSWORD values encrypted.
+        # DSS does not always populate runnable plugin_config with PASSWORD fields,
+        # so allow a fallback via the runnable config (set by the custom form).
         if self.admin_client is None:
+            if isinstance(self.plugin_config, dict) and "admin_api_token" not in self.plugin_config:
+                token_from_config = (self.config or {}).get("admin_api_token")
+                if isinstance(token_from_config, str) and token_from_config.strip():
+                    self.plugin_config["admin_api_token"] = token_from_config.strip()
             self.admin_client = create_admin_client(self.plugin_config)
 
         payload = normalize_payload(self.config or {})

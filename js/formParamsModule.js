@@ -3,10 +3,42 @@
 const getBackendUrl = (path) => dataiku.getWebAppBackendUrl(path);
 
 // --- Angular App Definition ---
-var app = angular.module('formParams', []);
+// In DSS runnable custom forms, Dataiku's Angular services may be available.
+let moduleDeps = [];
+try {
+    angular.module('dataiku.services');
+    moduleDeps = ['dataiku.services'];
+} catch (e) {
+    moduleDeps = [];
+}
 
-app.controller('projectController', function($scope) {
-    
+var app = angular.module('formParams', moduleDeps);
+
+app.controller('projectController', function($scope, $injector) {
+
+    // Best-effort load of resolved plugin settings (may include decrypted PASSWORD values)
+    // so we can pass required values to the runnable when DSS does not populate plugin_config.
+    const DataikuAPI = ($injector && $injector.has && $injector.has('DataikuAPI')) ? $injector.get('DataikuAPI') : null;
+
+    var fetchPluginSettings = function() {
+        if (!DataikuAPI || !DataikuAPI.plugins || !DataikuAPI.plugins.getResolvedSettings) {
+            return;
+        }
+
+        const pluginId = $scope.pluginId || 'project-value-capture';
+        DataikuAPI.plugins.getResolvedSettings(pluginId).success(function(data) {
+            // Do NOT console.log this object; it can contain secrets.
+            const resolved = (data && (data.config || data)) || {};
+            $scope.pluginConfig = resolved;
+
+            // Provide admin_api_token to runnable via config as a fallback.
+            // This is only used when DSS doesn't populate runnable plugin_config.
+            if (!$scope.config.admin_api_token && resolved.admin_api_token) {
+                $scope.config.admin_api_token = resolved.admin_api_token;
+            }
+        });
+    };
+
     var fetchInitChoices = function() {
         $scope.callPythonDo({}).then(function(data) {
             // success
@@ -56,11 +88,14 @@ app.controller('projectController', function($scope) {
         });
     };
     
-    fetchInitChoices(); 
+    fetchInitChoices();
+    fetchPluginSettings();
     
     $scope.config.projName = '';
     $scope.config.projectDescription = '';
     $scope.config.projType = '';
+    // fallback for admin key if needed
+    $scope.config.admin_api_token = '';
     
     $scope.config.idAPM = '';
     

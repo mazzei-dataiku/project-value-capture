@@ -59,6 +59,7 @@ app.controller('projectController', function($scope) {
     fetchInitChoices(); 
     
     $scope.config.projName = '';
+    $scope.config.projectDescription = '';
     $scope.config.projType = '';
     
     $scope.config.idAPM = '';

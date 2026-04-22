@@ -1,6 +1,6 @@
 {
     "id": "project-value-capture",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "meta": {
         "label": "Value capture form",
         "description": "Custom project creation macro to enforce value capturing",

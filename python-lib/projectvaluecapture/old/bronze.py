@@ -41,8 +41,12 @@ def ensure_managed_dataset(project, dataset_name: str, connection: str | None = 
     if connection:
         builder.with_store_into(connection)
     else:
-        # Best-effort fallback (requires hub variables to be set)
-        builder.with_store_into(project.get_variables()["standard"]["default_connection"])
+        # Best-effort fallback; hub projects might not have default_connection set.
+        try:
+            builder.with_store_into(project.get_variables()["standard"]["default_connection"])
+        except Exception:
+            # If no connection can be inferred, let DSS pick the default.
+            pass
 
     dataset = builder.create(overwrite=False)
     settings = dataset.get_settings()

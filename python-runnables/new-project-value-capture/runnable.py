@@ -5,6 +5,8 @@ from dataiku.runnables import Runnable
 
 from projectvaluecapture.admin_client import set_admin_client
 from projectvaluecapture.new_project import create_project_with_fallback, ensure_hub_project
+from projectvaluecapture.old.bronze import append_row, ensure_managed_dataset
+from projectvaluecapture.old.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
 
 
 class MyRunnable(Runnable):
@@ -47,11 +49,13 @@ class MyRunnable(Runnable):
                 "hub_project_description", "Central hub for project intake logging"
             )
 
-        # Ensure the hub project exists (creates it if missing).
-        ensure_hub_project(self)
+        payload = normalize_payload(self.config or {})
 
-        project_name = (self.config or {}).get("projName")
-        project_type = (self.config or {}).get("projType")
+        # Ensure the hub project exists (creates it if missing).
+        hub_project = ensure_hub_project(self)
+
+        project_name = payload.project_name
+        project_type = payload.project_type
 
         if project_type == "POC" and project_name:
             self.project_name = f"POC {project_name}"
@@ -69,5 +73,35 @@ class MyRunnable(Runnable):
         if project_type == "POC":
             return {"projectKey": self.project_key, "status": "created", "logged": False}
 
-        # TODO: implement audit log write
-        return {"projectKey": self.project_key, "status": "created", "logged": False}
+        plugin_cfg = getattr(self, "plugin_config", {}) or {}
+        if isinstance(plugin_cfg, dict) and "param1" in plugin_cfg and isinstance(plugin_cfg.get("param1"), dict):
+            plugin_cfg = plugin_cfg["param1"]
+
+        bronze_dataset_name = "projects_intake_bronze"
+        if isinstance(plugin_cfg, dict) and isinstance(plugin_cfg.get("bronze_dataset_name"), str):
+            bronze_dataset_name = plugin_cfg.get("bronze_dataset_name") or bronze_dataset_name
+
+        bronze_dataset = ensure_managed_dataset(hub_project, dataset_name=bronze_dataset_name, connection=None)
+
+        bronze_row = {
+            "project_key": self.project_key,
+            "project_name": payload.project_name,
+            "created_at": utc_now_iso(),
+            "created_by": self.dss_login or "",
+            "project_type": payload.project_type,
+            "gbu": payload.gbu,
+            "apm_id": payload.apm_id or "",
+            "business_owners_json": to_json_str(payload.business_owners),
+            "technical_owners_json": to_json_str(payload.technical_owners),
+            "problem_statement": payload.problem_statement,
+            "solution_description": payload.solution_description,
+            "links_json": to_json_str(payload.links),
+            "value_drivers_json": to_json_str(payload.value_drivers),
+            "intake_payload_json": to_json_str(payload.raw_payload),
+            "plugin_version": "unknown",
+            "intake_version": INTAKE_VERSION,
+        }
+
+        append_row(bronze_dataset, bronze_row)
+
+        return {"projectKey": self.project_key, "status": "created", "logged": True}

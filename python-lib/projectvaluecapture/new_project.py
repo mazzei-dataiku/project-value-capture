@@ -20,7 +20,7 @@ def try_create_project(self):
     )
 
 
-def create_project_with_fallback(self):
+def create_project_with_fallback(self, key_max_len: int = 24):
     # determine default folder if none specified
     if not self.project_folder_id:
         root_folder = self.user_client.get_root_project_folder()
@@ -31,7 +31,7 @@ def create_project_with_fallback(self):
 
     for attempt in range(max_attempts):
         suffix = None if attempt == 0 else attempt
-        self.project_key = build_project_key(self.project_name, suffix)
+        self.project_key = build_project_key(self.project_name, suffix, max_len=key_max_len)
 
         try:
             project_handle = try_create_project(self)
@@ -132,9 +132,19 @@ def ensure_hub_project(self):
 
     hub_key = build_project_key(hub_name, max_len=64)
 
+    # A get_project() failure isn't always "not found" (could be permissions, networking,
+    # invalid key, etc.). Try to detect "missing" by listing projects.
     try:
         return self.admin_client.get_project(hub_key)
     except Exception:
+        pass
+
+    try:
+        existing_keys = {p.get("projectKey") for p in (self.admin_client.list_projects() or [])}
+        if hub_key in existing_keys:
+            return self.admin_client.get_project(hub_key)
+    except Exception:
+        # If we can't list projects, fall through to a create attempt.
         pass
 
     self.project_name = hub_name
@@ -146,4 +156,5 @@ def ensure_hub_project(self):
     self.dss_login = plugin_cfg.get("hub_project_owner", "admin")
 
     # Use fallback creation logic to avoid collisions.
-    return create_project_with_fallback(self)
+    # Hub projects allow longer keys; they are derived from hub_project_name.
+    return create_project_with_fallback(self, key_max_len=64)

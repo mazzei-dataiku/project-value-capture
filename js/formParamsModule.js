@@ -15,6 +15,8 @@ try {
 var app = angular.module('formParams', moduleDeps);
 
 app.controller('projectController', function($scope) {
+    // DSS runnable param forms provide $scope.config. Create it for safety.
+    $scope.config = $scope.config || {};
 
     var fetchInitChoices = function() {
         $scope.callPythonDo({}).then(function(data) {

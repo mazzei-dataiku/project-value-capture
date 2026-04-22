@@ -1,23 +1,16 @@
-<!DOCTYPE html>
-<html ng-app="formParams">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Details</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-    <link href="/plugins/project-value-capture/resource/style.css" rel="stylesheet" type="text/css">
+<!--
+  DSS runnable custom parameter form template.
+  This must be an HTML fragment (no <html>/<head>/<body> tags).
+-->
+<link href="/plugins/project-value-capture/resource/style.css" rel="stylesheet" type="text/css">
 
-</head>
+<div ng-controller="projectController" class="custom-app-container">
+    <main class="custom-card">
+        <div class="custom-card-header">
+            <h3>Project Data Entry</h3>
+        </div>
 
-<body>
-    <div ng-controller="projectController" class="custom-app-container">
-        
-        <main class="custom-card">
-            <div class="custom-card-header">
-                <h3>Project Data Entry</h3>
-            </div>
-            
-            <div class="custom-card-body">
+        <div class="custom-card-body">
                 <div class="custom-form-group">
                     <label>Project Name:</label> 
                     <input type="string" ng-model="config.projName" placeholder="Your project name" required>
@@ -47,7 +40,7 @@
                         
                         <div class="custom-form-group custom-half-width" ng-if="fc_gbus_enabled">
                             <label>GBU:</label> 
-                            <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options='g for g in gbuOptions' /> 
+                            <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options="g for g in gbuOptions"></select>
                         </div>
                     </div>
                     
@@ -148,8 +141,6 @@
                         </table>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>  
-</body>
-</html>
+        </div>
+    </main>
+</div>

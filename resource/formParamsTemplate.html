@@ -90,9 +90,10 @@
                     <div class="custom-error-text" ng-if="validation_state.solutionDescription">Required</div>
                 </div>
 
-                <div class="custom-form-group">
-                    <label>Relevant Links (Optional)</label>
-                    <table cellspacing="0" class="custom-data-table">
+                    <div class="custom-form-group">
+                        <label>Relevant Links (Optional)</label>
+                        <table cellspacing="0" class="custom-data-table custom-data-table-3col">
+
                         <thead>
                             <tr>
                                 <th>Label</th>
@@ -111,12 +112,15 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
+
                 </div>
+
 
                 <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
                     <div class="custom-section-separator"></div>
                     <label>Value Drivers</label>
-                    <table cellspacing="0" class="custom-data-table">
+                    <table cellspacing="0" class="custom-data-table custom-data-table-3col">
                         <thead>
                             <tr>
                                 <th>Driver</th>
@@ -173,7 +177,8 @@
 
                     <div class="custom-alert" ng-if="config.useSnowflakeVars && snowflake_warning">{{snowflake_warning}}</div>
 
-                    <table cellspacing="0" class="custom-data-table" ng-if="config.useSnowflakeVars && (config.snowflakeRows || []).length">
+                    <div class="custom-table-scroll" ng-if="config.useSnowflakeVars && (config.snowflakeRows || []).length">
+                        <table cellspacing="0" class="custom-data-table custom-data-table-snowflake">
                         <thead>
                             <tr>
                                 <th>Use?</th>
@@ -207,6 +212,9 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                    </div>
                 </div>
 
                 <div class="custom-alert custom-alert-danger" ng-if="validation_errors && validation_errors.length">

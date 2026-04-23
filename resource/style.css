@@ -203,10 +203,26 @@
             table-layout: fixed; /* Forces tables to respect explicit column widths */
         }
 
-        /* Enforce consistent column widths across both tables */
-        .custom-data-table th:nth-child(1) { width: 42%; }
-        .custom-data-table th:nth-child(2) { width: 42%; }
-        .custom-data-table th:nth-child(3) { width: 16%; }
+        .custom-table-scroll {
+            overflow-x: auto;
+        }
+
+        .custom-data-table-snowflake {
+            min-width: 880px;
+        }
+
+        /* Default 3-column tables (Links, Value Drivers) */
+        .custom-data-table-3col th:nth-child(1) { width: 42%; }
+        .custom-data-table-3col th:nth-child(2) { width: 42%; }
+        .custom-data-table-3col th:nth-child(3) { width: 16%; }
+
+        /* Snowflake table has 6 columns */
+        .custom-data-table-snowflake th:nth-child(1) { width: 60px; }
+        .custom-data-table-snowflake th:nth-child(2) { width: 180px; }
+        .custom-data-table-snowflake th:nth-child(3) { width: 160px; }
+        .custom-data-table-snowflake th:nth-child(4) { width: 160px; }
+        .custom-data-table-snowflake th:nth-child(5) { width: 160px; }
+        .custom-data-table-snowflake th:nth-child(6) { width: 160px; }
 
         .custom-data-table th, .custom-data-table td {
             padding: 8px 10px;

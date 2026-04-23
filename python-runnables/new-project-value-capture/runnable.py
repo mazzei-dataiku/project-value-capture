@@ -3,7 +3,11 @@ from __future__ import annotations
 import dataiku
 from dataiku.runnables import Runnable
 
-from projectvaluecapture.client_builder import create_admin_client, create_user_client
+from projectvaluecapture.client_builder import (
+    create_admin_client,
+    create_user_client,
+    enforce_project_create_groups,
+)
 from projectvaluecapture.new_project import create_project_with_fallback, ensure_hub_project
 from projectvaluecapture.bronze import append_row, ensure_managed_dataset
 from projectvaluecapture.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
@@ -32,6 +36,11 @@ class MyRunnable(Runnable):
                 "hub_project_description", "Central hub for project intake logging"
             )
 
+        # Enforce group access before using the admin client.
+        requesting_login, requesting_groups = enforce_project_create_groups(
+            self.user_client, self.plugin_config
+        )
+
         # Build admin client only after plugin_config has been hydrated.
         # DSS does not always populate runnable plugin_config with PASSWORD fields,
         # so allow a fallback via the runnable config (set by the custom form).
@@ -58,7 +67,8 @@ class MyRunnable(Runnable):
         # Create the requested project (this is the core macro behavior).
         self.project_description = (self.config or {}).get("projectDescription", "")
         self.project_folder_id = (self.config or {}).get("projectFolderId")
-        self.dss_login = (self.user_client.get_auth_info() or {}).get("authIdentifier")
+        self.dss_login = requesting_login
+        self.dss_groups = requesting_groups
 
         project_handle = create_project_with_fallback(self)
 
@@ -89,7 +99,6 @@ class MyRunnable(Runnable):
             "links_json": to_json_str(payload.links),
             "value_drivers_json": to_json_str(payload.value_drivers),
             "intake_payload_json": to_json_str(payload.raw_payload),
-            "plugin_version": "unknown",
             "intake_version": INTAKE_VERSION,
         }
 

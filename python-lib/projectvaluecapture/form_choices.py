@@ -79,8 +79,12 @@ def _get_bool(cfg: dict[str, Any], key: str, default: bool = True) -> bool:
 def build_form_choices_response(plugin_config: Any) -> dict[str, Any]:
     cfg = _unwrap_plugin_config(plugin_config)
 
+    proj_types = _get_list(cfg, "fc_proj_types")
+    if "POC" not in proj_types:
+        proj_types.append("POC")
+
     return {
-        "projTypes": _get_list(cfg, "fc_proj_types"),
+        "projTypes": proj_types,
 
         "fc_gbus_enabled": _get_bool(cfg, "fc_gbus_enabled", True),
         "GBUs": _get_list(cfg, "fc_gbus"),

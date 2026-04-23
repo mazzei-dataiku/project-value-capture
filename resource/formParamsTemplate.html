@@ -11,9 +11,16 @@
         </div>
 
         <div class="custom-card-body">
+            <div class="custom-alert custom-alert-danger" ng-if="validation_errors && validation_errors.length">
+                <div><strong>Please fix the following before running:</strong></div>
+                <ul>
+                    <li ng-repeat="e in validation_errors track by $index">{{e}}</li>
+                </ul>
+            </div>
             <div class="custom-form-group">
                 <label>Project Name:</label>
-                <input type="text" ng-model="config.projName" placeholder="Your project name" required>
+                <input type="text" ng-model="config.projName" placeholder="Your project name" required ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.projName}">
+                <div class="custom-error-text" ng-if="validation_state.projName">Required</div>
             </div>
 
             <div class="custom-form-group">
@@ -25,7 +32,7 @@
                 <label>Project Type:</label>
                 <div class="custom-radio-group">
                     <span ng-repeat="n in projTypes" class="custom-radio-option">
-                        <input type="radio" name="projType" ng-model="$parent.config.projType" ng-value="n" /> {{n}}
+                        <input type="radio" name="projType" ng-model="$parent.config.projType" ng-value="n" ng-change="recomputeDerived()" /> {{n}}
                     </span>
                 </div>
             </div>
@@ -34,45 +41,51 @@
                 <div class="custom-form-row">
                     <div ng-show="config.projType === 'Industrialization'" class="custom-form-group custom-half-width">
                         <label>APM ID:</label>
-                        <input type="text" ng-model="config.idAPM" placeholder="APM ID from system">
+                        <input type="text" ng-model="config.idAPM" placeholder="APM ID from system" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.idAPM}">
+                        <div class="custom-error-text" ng-if="validation_state.idAPM">Required for Industrialization</div>
                     </div>
 
                     <div class="custom-form-group custom-half-width" ng-if="fc_gbus_enabled">
                         <label>GBU:</label>
-                        <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options="g for g in gbuOptions"></select>
+                        <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options="g for g in gbuOptions" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.gbu}"></select>
+                        <div class="custom-error-text" ng-if="validation_state.gbu">Required</div>
                     </div>
                 </div>
 
                 <div class="custom-form-row">
                     <div class="custom-form-group custom-half-width" ng-if="fc_business_users_enabled">
                         <label>Business Owner:</label>
-                        <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.businessOwner" ng-options="u for u in usersA"></select>
+                        <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.businessOwner" ng-options="u for u in usersA" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.businessOwner}"></select>
+                        <div class="custom-error-text" ng-if="validation_state.businessOwner">Select at least one</div>
 
                         <div class="custom-form-group custom-other-input-container" ng-show="(config.businessOwner || []).indexOf('Other') !== -1">
                             <label>Please Specify:</label>
-                            <input type="text" ng-model="config.customBusinessOwner" placeholder="Custom business owner name">
+                            <input type="text" ng-model="config.customBusinessOwner" placeholder="Custom business owner name" ng-change="recomputeDerived()">
                         </div>
                     </div>
 
                     <div class="custom-form-group custom-half-width" ng-if="fc_technical_users_enabled">
                         <label>Technical Owner:</label>
-                        <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.technicalOwner" ng-options="u for u in usersB"></select>
+                        <select dku-bs-select="{liveSearch:true}" multiple ng-model="config.technicalOwner" ng-options="u for u in usersB" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.technicalOwner}"></select>
+                        <div class="custom-error-text" ng-if="validation_state.technicalOwner">Select at least one</div>
 
                         <div class="custom-form-group custom-other-input-container" ng-show="(config.technicalOwner || []).indexOf('Other') !== -1">
                             <label>Please Specify:</label>
-                            <input type="text" ng-model="config.customTechnicalOwner" placeholder="Custom technical owner name">
+                            <input type="text" ng-model="config.customTechnicalOwner" placeholder="Custom technical owner name" ng-change="recomputeDerived()">
                         </div>
                     </div>
                 </div>
 
                 <div class="custom-form-group">
                     <label>Problem Statement:</label>
-                    <textarea ng-model="config.problemStatement" placeholder="Describe the goal of your project"></textarea>
+                    <textarea ng-model="config.problemStatement" placeholder="Describe the goal of your project" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.problemStatement}"></textarea>
+                    <div class="custom-error-text" ng-if="validation_state.problemStatement">Required</div>
                 </div>
 
                 <div class="custom-form-group">
                     <label>Solution Description:</label>
-                    <textarea ng-model="config.solutionDescription" placeholder="Describe underlying process or solution for your project"></textarea>
+                    <textarea ng-model="config.solutionDescription" placeholder="Describe underlying process or solution for your project" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.solutionDescription}"></textarea>
+                    <div class="custom-error-text" ng-if="validation_state.solutionDescription">Required</div>
                 </div>
 
                 <div class="custom-form-group">
@@ -87,8 +100,8 @@
                         </thead>
                         <tbody>
                             <tr ng-repeat="label in config.labels track by $index">
-                                <td><input type="text" ng-model="label.label" placeholder="e.g. Jira Board, must be unique"></td>
-                                <td><input type="text" ng-model="config.links[$index].link" placeholder="https://..."></td>
+                                <td><input type="text" ng-model="label.label" placeholder="e.g. Jira Board, must be unique" ng-change="recomputeDerived()"></td>
+                                <td><input type="text" ng-model="config.links[$index].link" placeholder="https://..." ng-change="recomputeDerived()"></td>
                                 <td class="custom-action-cell">
                                     <div class="custom-action-btn custom-add-btn" ng-click="addLink()">+</div>
                                     <div class="custom-action-btn custom-delete-btn" ng-click="deleteLink($index)" ng-if="$index > 0">−</div>
@@ -99,6 +112,7 @@
                 </div>
 
                 <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
+                    <div class="custom-error-text" ng-if="validation_state.valueDrivers">At least one value driver is required</div>
                     <label>Value Drivers</label>
                     <table cellspacing="0" class="custom-data-table">
                         <thead>
@@ -113,7 +127,8 @@
                                 <td>
                                     <select dku-bs-select="{liveSearch:true}"
                                             ng-model="driver.driver"
-                                            ng-options="d for d in driverOptions">
+                                            ng-options="d for d in driverOptions"
+                                            ng-change="recomputeDerived()">
                                     </select>
                                 </td>
 
@@ -121,13 +136,15 @@
                                     <input type="number"
                                            ng-if="financial_value_drivers_enabled && financialValueDrivers.indexOf(driver.driver) !== -1"
                                            ng-model="config.impacts[$index].impact"
-                                           placeholder="Enter value in USD ($)">
+                                           placeholder="Enter value in USD ($)"
+                                           ng-change="recomputeDerived()">
 
                                     <select dku-bs-select="{liveSearch:true}"
                                             ng-if="!financial_value_drivers_enabled || financialValueDrivers.indexOf(driver.driver) === -1"
                                             ng-model="config.impacts[$index].impact"
                                             ng-options="o for o in nonFinImpactOptions"
-                                            ng-disabled="!fc_non_fin_impact_levels_enabled">
+                                            ng-disabled="!fc_non_fin_impact_levels_enabled"
+                                            ng-change="recomputeDerived()">
                                     </select>
                                 </td>
 

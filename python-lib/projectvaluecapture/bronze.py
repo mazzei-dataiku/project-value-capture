@@ -26,7 +26,6 @@ def bronze_schema_columns() -> list[dict[str, str]]:
         {"name": "links_json", "type": "string"},
         {"name": "value_drivers_json", "type": "string"},
         {"name": "intake_payload_json", "type": "string"},
-        {"name": "plugin_version", "type": "string"},
         {"name": "intake_version", "type": "string"},
     ]
 
@@ -69,6 +68,52 @@ def _infer_managed_connection(project) -> str | None:
     return "filesystem_managed"
 
 
+def _existing_schema_column_names(dataset) -> set[str]:
+    """Return existing column names for a dataset.
+
+    This uses the dataset settings raw schema, which may differ slightly by DSS version.
+    """
+
+    try:
+        raw = dataset.get_settings().get_raw() or {}
+    except Exception:
+        return set()
+
+    schema = raw.get("schema")
+    if isinstance(schema, dict):
+        columns = schema.get("columns")
+    else:
+        columns = schema
+
+    if not isinstance(columns, list):
+        return set()
+
+    out: set[str] = set()
+    for col in columns:
+        if isinstance(col, dict):
+            name = col.get("name")
+            if isinstance(name, str) and name.strip():
+                out.add(name.strip())
+    return out
+
+
+def _ensure_bronze_schema(dataset) -> None:
+    existing_cols = _existing_schema_column_names(dataset)
+    if not existing_cols:
+        # If we can't read schema, avoid potentially destructive writes.
+        return
+
+    settings = dataset.get_settings()
+    to_add = [c for c in bronze_schema_columns() if c.get("name") not in existing_cols]
+    if not to_add:
+        return
+
+    for col in to_add:
+        settings.add_raw_schema_column(col)
+
+    settings.save()
+
+
 def ensure_managed_dataset(project, dataset_name: str, connection: str | None = None):
     try:
         existing = {d["name"] for d in project.list_datasets()}
@@ -80,7 +125,9 @@ def ensure_managed_dataset(project, dataset_name: str, connection: str | None = 
         )
 
     if dataset_name in existing:
-        return project.get_dataset(dataset_name)
+        dataset = project.get_dataset(dataset_name)
+        _ensure_bronze_schema(dataset)
+        return dataset
 
     builder = project.new_managed_dataset(dataset_name)
 

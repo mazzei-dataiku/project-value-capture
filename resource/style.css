@@ -248,6 +248,33 @@
             transform: scale(0.95);
         }
 
+        .custom-alert {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .custom-alert-danger {
+            background: #fff5f5;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .custom-alert ul {
+            margin: 6px 0 0 18px;
+        }
+
+        .custom-error-text {
+            margin-top: 6px;
+            color: #b91c1c;
+            font-size: 0.85rem;
+        }
+
+        .custom-invalid {
+            border-color: #ef4444 !important;
+        }
+
         .custom-action-btn:hover {
             opacity: 0.85;
         }

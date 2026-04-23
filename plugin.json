@@ -1,6 +1,6 @@
 {
     "id": "project-value-capture",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "meta": {
         "label": "Value capture form",
         "description": "Custom project creation macro to enforce value capturing",
@@ -12,14 +12,6 @@
         "licenseInfo": "Apache Software License"
     },
     "params": [
-        {
-            "name": "admin_client_profile",
-            "label": "Admin Client Profile",
-            "type": "STRING",
-            "description": "Admin client profile name used by the runnable",
-            "mandatory": true,
-            "defaultValue": "admin"
-        },
         {
             "name": "admin_api_token",
             "label": "Admin API Token",
@@ -61,10 +53,18 @@
             "defaultValue": "projects_intake_bronze"
         },
         {
-            "name": "fc_proj_types",
-            "label": "Project Types",
+            "name": "project_create_groups",
+            "label": "Allowed Project Creator Groups",
             "type": "STRINGS",
-            "description": "Radio options for Project Type (POC is auto-added by the plugin and is not logged)",
+            "description": "If set, only users in at least one of these groups can use the macro to create projects. Leave empty to allow everyone.",
+            "mandatory": false,
+            "defaultValue": []
+        },
+        {
+            "name": "fc_proj_types",
+            "label": "Project Types (POC auto-added)",
+            "type": "STRINGS",
+            "description": "Radio options for Project Type. The macro always adds 'POC' (POC prefixes the project name/key and skips intake logging).",
             "mandatory": true,
             "defaultValue": [
                 "Ad-Hoc",

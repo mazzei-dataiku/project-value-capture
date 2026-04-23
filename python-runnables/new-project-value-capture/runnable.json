@@ -15,7 +15,7 @@
     "paramsPythonSetup" : "formApp.py",
     "permissions": [],
     "resultType": "JSON_OBJECT",
-    "resultLabel": "my production",
-    "extension": "txt",
-    "mimeType": "text/plain"
+    "resultLabel": "New Project Result",
+    "extension": "json",
+    "mimeType": "application/json"
 }

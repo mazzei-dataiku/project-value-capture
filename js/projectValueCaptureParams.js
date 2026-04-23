@@ -60,18 +60,22 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     $scope.addLink = function() {
         $scope.config.labels.push({label:""});
         $scope.config.links.push({link:""});
+        recomputeDerived();
     };
     $scope.deleteLink = function(index) {
         $scope.config.labels.splice(index, 1);
         $scope.config.links.splice(index, 1);
+        recomputeDerived();
     };
     $scope.addDriver = function() {
       $scope.config.drivers.push({driver:""});
       $scope.config.impacts.push({impact:""});
+      recomputeDerived();
     };
     $scope.deleteDriver = function(index) {
         $scope.config.drivers.splice(index, 1);
         $scope.config.impacts.splice(index, 1);
+        recomputeDerived();
     };
 
     function buildOwners(selected, customText) {
@@ -109,21 +113,92 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
         return out;
     }
 
+    function validateConfig() {
+        let errors = [];
+        let state = {};
+
+        let projNameOk = ($scope.config.projName || '').trim().length > 0;
+        state.projName = !projNameOk;
+        if (!projNameOk) {
+            errors.push('Project Name is required.');
+        }
+
+        let projTypeOk = ($scope.config.projType || '').trim().length > 0;
+        state.projType = !projTypeOk;
+        if (!projTypeOk) {
+            errors.push('Project Type is required.');
+        }
+
+        let needsFull = $scope.config.projType === 'Industrialization' || $scope.config.projType === 'Ad-Hoc';
+
+        if (needsFull) {
+            if ($scope.config.projType === 'Industrialization') {
+                let apmOk = ($scope.config.idAPM || '').trim().length > 0;
+                state.idAPM = !apmOk;
+                if (!apmOk) {
+                    errors.push('APM ID is required for Industrialization.');
+                }
+            }
+
+            if ($scope.fc_gbus_enabled) {
+                let gbuOk = ($scope.config.gbu || '').trim().length > 0;
+                state.gbu = !gbuOk;
+                if (!gbuOk) {
+                    errors.push('GBU is required.');
+                }
+            }
+
+            if ($scope.fc_business_users_enabled) {
+                let businessOk = Array.isArray($scope.config.finalBusinessOwners) && $scope.config.finalBusinessOwners.length > 0;
+                state.businessOwner = !businessOk;
+                if (!businessOk) {
+                    errors.push('At least one Business Owner is required.');
+                }
+            }
+
+            if ($scope.fc_technical_users_enabled) {
+                let technicalOk = Array.isArray($scope.config.finalTechnicalOwners) && $scope.config.finalTechnicalOwners.length > 0;
+                state.technicalOwner = !technicalOk;
+                if (!technicalOk) {
+                    errors.push('At least one Technical Owner is required.');
+                }
+            }
+
+            let problemOk = ($scope.config.problemStatement || '').trim().length > 0;
+            state.problemStatement = !problemOk;
+            if (!problemOk) {
+                errors.push('Problem Statement is required.');
+            }
+
+            let solutionOk = ($scope.config.solutionDescription || '').trim().length > 0;
+            state.solutionDescription = !solutionOk;
+            if (!solutionOk) {
+                errors.push('Solution Description is required.');
+            }
+
+            if ($scope.fc_value_drivers_enabled) {
+                let driversOk = Array.isArray($scope.config.finalZippedDrivers) && $scope.config.finalZippedDrivers.length > 0;
+                state.valueDrivers = !driversOk;
+                if (!driversOk) {
+                    errors.push('At least one Value Driver is required.');
+                }
+            }
+        }
+
+        $scope.validation_errors = errors;
+        $scope.validation_state = state;
+    }
+
     function recomputeDerived() {
         $scope.config.finalBusinessOwners = buildOwners($scope.config.businessOwner, $scope.config.customBusinessOwner);
         $scope.config.finalTechnicalOwners = buildOwners($scope.config.technicalOwner, $scope.config.customTechnicalOwner);
         $scope.config.finalZippedLinks = zipLinks($scope.config.labels, $scope.config.links);
         $scope.config.finalZippedDrivers = zipDrivers($scope.config.drivers, $scope.config.impacts);
+        validateConfig();
     }
 
-    // Keep derived fields in sync for the runnable
-    $scope.$watchGroup(
-        ['config.businessOwner', 'config.customBusinessOwner', 'config.technicalOwner', 'config.customTechnicalOwner'],
-        function() { recomputeDerived(); },
-        true
-    );
-    $scope.$watchGroup(['config.labels', 'config.links'], function() { recomputeDerived(); }, true);
-    $scope.$watchGroup(['config.drivers', 'config.impacts'], function() { recomputeDerived(); }, true);
+    $scope.recomputeDerived = recomputeDerived;
 
     recomputeDerived();
+
 }]);

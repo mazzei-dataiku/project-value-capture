@@ -24,6 +24,48 @@ def _unwrap_plugin_config(plugin_config: Any) -> dict[str, Any]:
     return plugin_config
 
 
+def get_auth_info_safe(user_client) -> dict[str, Any]:
+    try:
+        return user_client.get_auth_info() or {}
+    except Exception:
+        return {}
+
+
+def enforce_project_create_groups(user_client, plugin_config: Any) -> tuple[str | None, list[str]]:
+    """Ensure the current user belongs to at least one allowed group.
+
+    Controlled by plugin setting `project_create_groups`.
+    - Missing/empty list => allow everyone.
+    - Non-empty list => require intersection with user groups.
+
+    Returns (auth_identifier, groups).
+    """
+
+    cfg = _unwrap_plugin_config(plugin_config)
+    allowed = cfg.get("project_create_groups")
+    if not isinstance(allowed, list):
+        allowed = []
+
+    allowed_groups = [g.strip() for g in allowed if isinstance(g, str) and g.strip()]
+
+    auth_info = get_auth_info_safe(user_client)
+    auth_identifier = auth_info.get("authIdentifier")
+
+    groups = auth_info.get("groups")
+    if not isinstance(groups, list):
+        groups = []
+    user_groups = [g.strip() for g in groups if isinstance(g, str) and g.strip()]
+
+    if allowed_groups and not (set(user_groups) & set(allowed_groups)):
+        raise ValueError(
+            "You are not allowed to create projects. "
+            f"Required group(s): {', '.join(allowed_groups)}. "
+            f"Your group(s): {', '.join(user_groups) or 'none'}."
+        )
+
+    return auth_identifier, user_groups
+
+
 def build_dss_host() -> str:
     """Build a DSS base URL suitable for API calls.
 

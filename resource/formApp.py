@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from projectvaluecapture.client_builder import create_user_client, enforce_project_create_groups
 from projectvaluecapture.form_choices import build_form_choices_response
 
 
@@ -18,6 +19,10 @@ def do(payload, config, plugin_config, inputs):
             "Missing plugin settings (plugin_config is empty). "
             "Configure the plugin settings in DSS (Plugin settings page)."
         )
+
+    # Block unauthorized users before showing the form.
+    user_client = create_user_client()
+    enforce_project_create_groups(user_client, plugin_config)
 
     choices = build_form_choices_response(plugin_config)
 

@@ -32,6 +32,11 @@ def main() -> None:
     config = _load_json(configs_dir / "config.json")
     plugin_config = _load_json(configs_dir / "plugin_config.json")
 
+    # Keep unit testing config aligned with the current payload contract.
+    # The runnable expects zipped lists under these keys.
+    config.setdefault("finalZippedLinks", config.get("finalZippedLinks") or [])
+    config.setdefault("finalZippedDrivers", config.get("finalZippedDrivers") or [])
+
     try:
         runnable = MyRunnable(project_key="DATA_COLLECTION", config=config, plugin_config=plugin_config)
         print(runnable.run(lambda _: None))

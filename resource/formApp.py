@@ -57,13 +57,6 @@ def do(payload, config, plugin_config, inputs):
             if not _get_bool(plugin_config, "enable_snowflake_vars", False):
                 return {"enable_snowflake_vars": False, "snowflake_rows": []}
 
-            # Safe debug flags (do not leak secrets)
-            admin_token = (plugin_config or {}).get("admin_api_token")
-            debug = {
-                "has_admin_api_token": isinstance(admin_token, str) and bool(admin_token.strip()),
-                "admin_api_token_is_encrypted": isinstance(admin_token, str)
-                and admin_token.strip().startswith("e:AES:"),
-            }
 
             # Scope to user-visible Snowflake connections
             try:
@@ -79,11 +72,11 @@ def do(payload, config, plugin_config, inputs):
                         "User does not have access to any Snowflake connection. "
                         "If you feel this is incorrect, please consult your Dataiku Administration Team."
                     ),
-                    "debug": debug,
                 }
 
             # Read hub mapping dataset using the admin client
             admin_client = create_admin_client(plugin_config)
+
             hub_name = (plugin_config or {}).get("hub_project_name") or "Project Value Hub"
             hub_key = build_project_key(str(hub_name), max_len=60)
             hub_project = admin_client.get_project(hub_key)
@@ -106,7 +99,6 @@ def do(payload, config, plugin_config, inputs):
                         f"{dataset_name!r} was not found in the hub project. "
                         "Please consult your Dataiku Administration Team."
                     ),
-                    "debug": debug,
                 }
 
             mapping_ds = hub_project.get_dataset(dataset_name)
@@ -134,10 +126,9 @@ def do(payload, config, plugin_config, inputs):
                         "Snowflake variables are enabled, but no Snowflake connections are configured for this feature. "
                         "If you feel this is incorrect, please consult your Dataiku Administration Team."
                     ),
-                    "debug": debug,
                 }
 
-            return {"enable_snowflake_vars": True, "snowflake_rows": out_rows, "debug": debug}
+            return {"enable_snowflake_vars": True, "snowflake_rows": out_rows}
 
         except Exception as e:
             # Make sure the UI always gets a response it can render.

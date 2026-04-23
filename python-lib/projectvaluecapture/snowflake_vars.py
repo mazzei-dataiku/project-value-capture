@@ -36,21 +36,33 @@ def extract_variable_name(token: str) -> str:
 def read_snowflake_mapping_rows(dataset) -> list[SnowflakeMappingRow]:
     """Read mapping rows from a DSSDataset.
 
-    Note: `dataikuapi.dss.dataset.DSSDataset.iter_rows()` yields lists of values,
-    not dicts. To get dict-like rows, we use the core dataset handle.
+    `dataikuapi.dss.dataset.DSSDataset.iter_rows()` yields lists of values. We map
+    them to column names using the dataset schema, so that the call is executed
+    with the same permissions as the DSSClient that owns `dataset`.
 
     Expected columns: connection_name, warehouse, database, role, schema.
     Missing columns are treated as empty strings.
     """
 
-    core = dataset.get_as_core_dataset()
+    schema = dataset.get_schema() or []
+    columns: list[str] = []
+    for c in schema:
+        if isinstance(c, dict):
+            name = c.get("name")
+            if isinstance(name, str) and name.strip():
+                columns.append(name.strip())
 
     rows: list[SnowflakeMappingRow] = []
-    for row in core.iter_rows(sampling="all", limit=None):
-        # core.iter_rows yields dict-like rows
+    for values in dataset.iter_rows():
+        if not isinstance(values, list):
+            continue
+
+        row = {columns[i]: values[i] for i in range(min(len(columns), len(values)))}
+
         connection_name = (row.get("connection_name") or "").strip()
         if not connection_name:
             continue
+
         rows.append(
             SnowflakeMappingRow(
                 connection_name=connection_name,
@@ -60,6 +72,7 @@ def read_snowflake_mapping_rows(dataset) -> list[SnowflakeMappingRow]:
                 schema=str(row.get("schema") or "").strip(),
             )
         )
+
     return rows
 
 

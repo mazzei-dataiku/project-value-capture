@@ -99,7 +99,6 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
             $scope.enable_snowflake_vars = !!data.enable_snowflake_vars;
             $scope.snowflake_warning = data.snowflake_warning || '';
             $scope.snowflake_rows = data.snowflake_rows || [];
-            $scope.snowflake_debug = data.debug || null;
 
             $scope.config.snowflakeRows = ($scope.snowflake_rows || []).map(function(r) {
                 function initCell(templateValue) {

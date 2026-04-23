@@ -11,7 +11,11 @@ from projectvaluecapture.client_builder import (
 from projectvaluecapture.new_project import create_project_with_fallback, ensure_hub_project
 from projectvaluecapture.bronze import append_row, ensure_managed_dataset
 from projectvaluecapture.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
-from projectvaluecapture.snowflake_vars import extract_variable_name, is_variable_token
+from projectvaluecapture.snowflake_vars import (
+    extract_variable_name,
+    is_variable_token,
+    read_snowflake_mapping_rows,
+)
 
 
 class MyRunnable(Runnable):
@@ -89,11 +93,11 @@ class MyRunnable(Runnable):
 
             try:
                 mapping_ds = hub_project.get_dataset(mapping_dataset_name)
-                mapping_rows = {}
-                for r in mapping_ds.get_as_core_dataset().iter_rows(sampling="all", limit=None):
-                    cn = r.get("connection_name")
-                    if isinstance(cn, str) and cn.strip():
-                        mapping_rows[cn.strip()] = r
+                mapping_rows = {
+                    r.connection_name: r
+                    for r in read_snowflake_mapping_rows(mapping_ds)
+                    if isinstance(r.connection_name, str) and r.connection_name.strip()
+                }
             except Exception as e:
                 raise ValueError(
                     "Snowflake variables are enabled but the mapping dataset could not be read. "

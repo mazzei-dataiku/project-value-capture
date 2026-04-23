@@ -172,11 +172,6 @@
                     </div>
 
                     <div class="custom-alert" ng-if="config.useSnowflakeVars && snowflake_warning">{{snowflake_warning}}</div>
-                    <div class="custom-alert" ng-if="config.useSnowflakeVars && snowflake_debug">
-                        <div><strong>Debug</strong></div>
-                        <div>Has admin_api_token: {{snowflake_debug.has_admin_api_token}}</div>
-                        <div>Token encrypted: {{snowflake_debug.admin_api_token_is_encrypted}}</div>
-                    </div>
 
                     <table cellspacing="0" class="custom-data-table" ng-if="config.useSnowflakeVars && (config.snowflakeRows || []).length">
                         <thead>

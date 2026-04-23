@@ -50,13 +50,14 @@ def read_snowflake_mapping_rows(dataset) -> list[SnowflakeMappingRow]:
     Missing columns are treated as empty strings.
     """
 
-    schema = dataset.get_schema() or []
+    schema_obj = dataset.get_schema() or {}
     columns: list[str] = []
-    for c in schema:
-        if isinstance(c, dict):
-            name = c.get("name")
-            if isinstance(name, str) and name.strip():
-                columns.append(name.strip())
+    if isinstance(schema_obj, dict):
+        for c in schema_obj.get("columns") or []:
+            if isinstance(c, dict):
+                name = c.get("name")
+                if isinstance(name, str) and name.strip():
+                    columns.append(name.strip())
 
     normalized = {c.lower().strip(): c for c in columns}
 

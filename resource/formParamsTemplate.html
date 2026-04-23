@@ -18,13 +18,6 @@
                 <div>{{auth_error}}</div>
             </div>
 
-            <div class="custom-alert custom-alert-danger" ng-if="!loadingChoices && !notAuthorized && validation_errors && validation_errors.length">
-                <div><strong>Please fix the following before running:</strong></div>
-                <ul>
-                    <li ng-repeat="e in validation_errors track by $index">{{e}}</li>
-                </ul>
-            </div>
-
             <div ng-if="!loadingChoices && !notAuthorized">
             <div class="custom-form-group">
                 <label>Project Name:</label>
@@ -121,7 +114,6 @@
                 </div>
 
                 <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
-                    <div class="custom-error-text" ng-if="validation_state.valueDrivers">At least one value driver is required</div>
                     <label>Value Drivers</label>
                     <table cellspacing="0" class="custom-data-table">
                         <thead>
@@ -164,6 +156,13 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+
+                <div class="custom-alert custom-alert-danger" ng-if="validation_errors && validation_errors.length">
+                    <div><strong>Please fix the following before running:</strong></div>
+                    <ul>
+                        <li ng-repeat="e in validation_errors track by $index">{{e}}</li>
+                    </ul>
                 </div>
             </div>
         </div>

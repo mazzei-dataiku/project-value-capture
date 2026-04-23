@@ -21,8 +21,12 @@ def do(payload, config, plugin_config, inputs):
         )
 
     # Block unauthorized users before showing the form.
+    # Don't raise here (it shows a scary stack trace in the UI).
     user_client = create_user_client()
-    enforce_project_create_groups(user_client, plugin_config)
+    try:
+        enforce_project_create_groups(user_client, plugin_config)
+    except Exception as e:
+        return {"authorized": False, "auth_error": str(e)}
 
     choices = build_form_choices_response(plugin_config)
 

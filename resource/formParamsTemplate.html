@@ -11,12 +11,21 @@
         </div>
 
         <div class="custom-card-body">
-            <div class="custom-alert custom-alert-danger" ng-if="validation_errors && validation_errors.length">
+            <div class="custom-alert" ng-if="loadingChoices">Loading...</div>
+
+            <div class="custom-alert custom-alert-danger" ng-if="!loadingChoices && notAuthorized">
+                <div><strong>Access denied</strong></div>
+                <div>{{auth_error}}</div>
+            </div>
+
+            <div class="custom-alert custom-alert-danger" ng-if="!loadingChoices && !notAuthorized && validation_errors && validation_errors.length">
                 <div><strong>Please fix the following before running:</strong></div>
                 <ul>
                     <li ng-repeat="e in validation_errors track by $index">{{e}}</li>
                 </ul>
             </div>
+
+            <div ng-if="!loadingChoices && !notAuthorized">
             <div class="custom-form-group">
                 <label>Project Name:</label>
                 <input type="text" ng-model="config.projName" placeholder="Your project name" required ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.projName}">
@@ -157,6 +166,7 @@
                     </table>
                 </div>
             </div>
+        </div>
         </div>
     </main>
 </div>

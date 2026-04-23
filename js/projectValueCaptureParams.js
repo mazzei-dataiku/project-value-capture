@@ -6,6 +6,10 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
 
     $scope.config = $scope.config || {};
 
+    $scope.notAuthorized = false;
+    $scope.auth_error = '';
+    $scope.loadingChoices = true;
+
     // Initialize default values
     $scope.config.projName = $scope.config.projName || '';
     $scope.config.projectDescription = $scope.config.projectDescription || '';
@@ -28,9 +32,22 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
 
     // --- BACKEND HANDSHAKE ---
     var fetchInitChoices = function() {
+        $scope.loadingChoices = true;
         // $scope.callPythonDo is built-in; it doesn't need $http
-        $scope.callPythonDo({}).then(function(data) {
-            $scope.projTypes = data.projTypes;
+         $scope.callPythonDo({}).then(function(data) {
+             if (data && data.authorized === false) {
+                 $scope.notAuthorized = true;
+                 $scope.auth_error = data.auth_error || 'You are not allowed to create projects.';
+                 $scope.projTypes = [];
+                 $scope.loadingChoices = false;
+                 recomputeDerived();
+                 return;
+             }
+
+             $scope.notAuthorized = false;
+             $scope.projTypes = data.projTypes;
+             $scope.loadingChoices = false;
+
 
             $scope.fc_gbus_enabled = data.fc_gbus_enabled;
             $scope.gbuOptions = data.GBUs;
@@ -49,10 +66,11 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
 
             $scope.financial_value_drivers_enabled = data.financial_value_drivers_enabled;
             $scope.financialValueDrivers = data.financialValueDrivers || [];
-        }, function(err) {
-            console.error("Backend failed to load choices", err);
-        });
-    };
+         }, function(err) {
+             $scope.loadingChoices = false;
+             console.error("Backend failed to load choices", err);
+         });
+     };
 
     fetchInitChoices();
 
@@ -113,9 +131,16 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
         return out;
     }
 
-    function validateConfig() {
-        let errors = [];
-        let state = {};
+     function validateConfig() {
+         if ($scope.notAuthorized) {
+             $scope.validation_errors = [];
+             $scope.validation_state = {};
+             return;
+         }
+
+         let errors = [];
+         let state = {};
+
 
         let projNameOk = ($scope.config.projName || '').trim().length > 0;
         state.projName = !projNameOk;

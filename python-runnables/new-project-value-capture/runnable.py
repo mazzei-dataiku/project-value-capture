@@ -94,7 +94,7 @@ class MyRunnable(Runnable):
             try:
                 mapping_ds = hub_project.get_dataset(mapping_dataset_name)
                 mapping_rows = {
-                    r.connection_name: r
+                    r.connection_name.strip().lower(): r
                     for r in read_snowflake_mapping_rows(mapping_ds)
                     if isinstance(r.connection_name, str) and r.connection_name.strip()
                 }
@@ -113,7 +113,7 @@ class MyRunnable(Runnable):
                 if not isinstance(connection_name, str) or not connection_name.strip():
                     continue
 
-                mapping = mapping_rows.get(connection_name)
+                mapping = mapping_rows.get(connection_name.strip().lower())
                 if not isinstance(mapping, dict):
                     continue
 

@@ -104,13 +104,29 @@ def do(payload, config, plugin_config, inputs):
             mapping_ds = hub_project.get_dataset(dataset_name)
             mapping_rows = read_snowflake_mapping_rows(mapping_ds)
 
-            visible = set([c for c in user_connections if isinstance(c, str)])
+            if not mapping_rows:
+                return {
+                    "enable_snowflake_vars": True,
+                    "snowflake_rows": [],
+                    "snowflake_warning": (
+                        "Snowflake variables are enabled, but the mapping dataset is empty (or missing required columns). "
+                        "Please consult your Dataiku Administration Team."
+                    ),
+                }
+
+            visible_by_lower = {
+                c.strip().lower(): c.strip()
+                for c in user_connections
+                if isinstance(c, str) and c.strip()
+            }
+
             out_rows = []
             for r in mapping_rows:
-                if r.connection_name in visible:
+                key = r.connection_name.strip().lower()
+                if key in visible_by_lower:
                     out_rows.append(
                         {
-                            "connection_name": r.connection_name,
+                            "connection_name": visible_by_lower[key],
                             "warehouse": r.warehouse,
                             "database": r.database,
                             "role": r.role,
@@ -119,12 +135,14 @@ def do(payload, config, plugin_config, inputs):
                     )
 
             if not out_rows:
+                mapped = sorted({r.connection_name for r in mapping_rows if r.connection_name})
                 return {
                     "enable_snowflake_vars": True,
                     "snowflake_rows": [],
                     "snowflake_warning": (
-                        "Snowflake variables are enabled, but no Snowflake connections are configured for this feature. "
-                        "If you feel this is incorrect, please consult your Dataiku Administration Team."
+                        "Snowflake variables are enabled, but none of your accessible Snowflake connections are present in the mapping dataset. "
+                        f"Accessible: {', '.join(sorted(visible_by_lower.values()))}. "
+                        f"Mapped: {', '.join(mapped)}."
                     ),
                 }
 

@@ -40,7 +40,13 @@ def read_snowflake_mapping_rows(dataset) -> list[SnowflakeMappingRow]:
     them to column names using the dataset schema, so that the call is executed
     with the same permissions as the DSSClient that owns `dataset`.
 
-    Expected columns: connection_name, warehouse, database, role, schema.
+    Expected columns (case-insensitive):
+    - connection_name (fallback: connection, name)
+    - warehouse
+    - database
+    - role
+    - schema
+
     Missing columns are treated as empty strings.
     """
 
@@ -52,6 +58,15 @@ def read_snowflake_mapping_rows(dataset) -> list[SnowflakeMappingRow]:
             if isinstance(name, str) and name.strip():
                 columns.append(name.strip())
 
+    normalized = {c.lower().strip(): c for c in columns}
+
+    def _get(row: dict[str, Any], *names: str) -> Any:
+        for n in names:
+            actual = normalized.get(n)
+            if actual is not None:
+                return row.get(actual)
+        return None
+
     rows: list[SnowflakeMappingRow] = []
     for values in dataset.iter_rows():
         if not isinstance(values, list):
@@ -59,17 +74,17 @@ def read_snowflake_mapping_rows(dataset) -> list[SnowflakeMappingRow]:
 
         row = {columns[i]: values[i] for i in range(min(len(columns), len(values)))}
 
-        connection_name = (row.get("connection_name") or "").strip()
+        connection_name = str(_get(row, "connection_name", "connection", "name") or "").strip()
         if not connection_name:
             continue
 
         rows.append(
             SnowflakeMappingRow(
                 connection_name=connection_name,
-                warehouse=str(row.get("warehouse") or "").strip(),
-                database=str(row.get("database") or "").strip(),
-                role=str(row.get("role") or "").strip(),
-                schema=str(row.get("schema") or "").strip(),
+                warehouse=str(_get(row, "warehouse") or "").strip(),
+                database=str(_get(row, "database") or "").strip(),
+                role=str(_get(row, "role") or "").strip(),
+                schema=str(_get(row, "schema") or "").strip(),
             )
         )
 

@@ -90,9 +90,7 @@ class MyRunnable(Runnable):
             try:
                 mapping_ds = hub_project.get_dataset(mapping_dataset_name)
                 mapping_rows = {}
-                for r in mapping_ds.iter_rows():
-                    if not isinstance(r, dict):
-                        continue
+                for r in mapping_ds.get_as_core_dataset().iter_rows(sampling="all", limit=None):
                     cn = r.get("connection_name")
                     if isinstance(cn, str) and cn.strip():
                         mapping_rows[cn.strip()] = r

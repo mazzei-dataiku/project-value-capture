@@ -19,6 +19,19 @@ This repository contains a Dataiku DSS plugin that provides a runnable (macro) w
 
 Plugin settings are defined in `plugin.json`.
 
+### Snowflake variables (optional)
+
+If `enable_snowflake_vars` is enabled, the form can optionally prompt for Snowflake connection variables and write them to the created project's global variables (`standard`).
+
+- The mapping is read from a hub project dataset (`snowflake_vars_dataset_name`, default `snowflake_connnection_vars_map`).
+- Expected columns: `connection_name`, `warehouse`, `database`, `role`, `schema`.
+- Cells using the exact form `${VAR_NAME}` are treated as variable keys and become editable in the form.
+- Cells not using `${...}` are treated as hard-coded display values and are not written to project variables.
+
+Notes:
+- The mapping dataset is read using the admin API key.
+- Snowflake variable writing is skipped for `POC` projects.
+
 ### Form choice lists
 
 Choice lists are expected as top-level lists prefixed with `fc_`:

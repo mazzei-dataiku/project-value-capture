@@ -18,6 +18,7 @@ This repo is a **Dataiku DSS plugin** (macro/runnable + webapp UI) stored under 
 - `python-lib/`: shared Python library code (importable package).
   - `projectvaluecapture/payload.py`: payload normalization + validation.
   - `projectvaluecapture/bronze.py`: hub bronze dataset create/append.
+  - `projectvaluecapture/snowflake_vars.py`: hub Snowflake mapping dataset parsing.
 - `unit_testing/`: local Code Studio harness script(s) for smoke testing.
 
 ## Environment / Prereqs (Dataiku Code Studio)

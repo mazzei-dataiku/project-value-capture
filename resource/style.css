@@ -255,6 +255,12 @@
             margin-bottom: 15px;
         }
 
+        .custom-section-separator {
+            height: 1px;
+            background: var(--border-color);
+            margin: 18px 0;
+        }
+
         .custom-alert-danger {
             background: #fff5f5;
             border-color: #fecaca;

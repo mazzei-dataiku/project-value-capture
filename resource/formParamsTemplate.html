@@ -113,6 +113,54 @@
                     </table>
                 </div>
 
+                <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
+                    <div class="custom-section-separator"></div>
+                    <label>Value Drivers</label>
+                    <table cellspacing="0" class="custom-data-table">
+                        <thead>
+                            <tr>
+                                <th>Driver</th>
+                                <th>Impact Size</th>
+                                <th style="text-align: center;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="driver in config.drivers track by $index">
+                                <td>
+                                    <select dku-bs-select="{liveSearch:true}"
+                                            ng-model="driver.driver"
+                                            ng-options="d for d in driverOptions"
+                                            ng-change="recomputeDerived()">
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input type="number"
+                                           ng-if="financial_value_drivers_enabled && financialValueDrivers.indexOf(driver.driver) !== -1"
+                                           ng-model="config.impacts[$index].impact"
+                                           placeholder="Enter value in USD ($)"
+                                           ng-change="recomputeDerived()">
+
+                                    <select dku-bs-select="{liveSearch:true}"
+                                            ng-if="!financial_value_drivers_enabled || financialValueDrivers.indexOf(driver.driver) === -1"
+                                            ng-model="config.impacts[$index].impact"
+                                            ng-options="o for o in nonFinImpactOptions"
+                                            ng-disabled="!fc_non_fin_impact_levels_enabled"
+                                            ng-change="recomputeDerived()">
+                                    </select>
+                                </td>
+
+                                <td class="custom-action-cell">
+                                    <div class="custom-action-btn custom-add-btn" ng-click="addDriver()">+</div>
+                                    <div class="custom-action-btn custom-delete-btn" ng-click="deleteDriver($index)" ng-if="$index > 0">−</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="custom-section-separator" ng-if="enable_snowflake_vars"></div>
+
                 <div class="custom-form-group" ng-if="enable_snowflake_vars">
                     <label>Snowflake Variables (Optional)</label>
 
@@ -155,51 +203,6 @@
                                 <td>
                                     <input type="text" ng-if="r.schema.editable" ng-model="r.schema.value" placeholder="Enter schema (optional)" ng-change="recomputeDerived()">
                                     <span ng-if="!r.schema.editable">{{r.schema.value}}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
-                    <label>Value Drivers</label>
-                    <table cellspacing="0" class="custom-data-table">
-                        <thead>
-                            <tr>
-                                <th>Driver</th>
-                                <th>Impact Size</th>
-                                <th style="text-align: center;"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="driver in config.drivers track by $index">
-                                <td>
-                                    <select dku-bs-select="{liveSearch:true}"
-                                            ng-model="driver.driver"
-                                            ng-options="d for d in driverOptions"
-                                            ng-change="recomputeDerived()">
-                                    </select>
-                                </td>
-
-                                <td>
-                                    <input type="number"
-                                           ng-if="financial_value_drivers_enabled && financialValueDrivers.indexOf(driver.driver) !== -1"
-                                           ng-model="config.impacts[$index].impact"
-                                           placeholder="Enter value in USD ($)"
-                                           ng-change="recomputeDerived()">
-
-                                    <select dku-bs-select="{liveSearch:true}"
-                                            ng-if="!financial_value_drivers_enabled || financialValueDrivers.indexOf(driver.driver) === -1"
-                                            ng-model="config.impacts[$index].impact"
-                                            ng-options="o for o in nonFinImpactOptions"
-                                            ng-disabled="!fc_non_fin_impact_levels_enabled"
-                                            ng-change="recomputeDerived()">
-                                    </select>
-                                </td>
-
-                                <td class="custom-action-cell">
-                                    <div class="custom-action-btn custom-add-btn" ng-click="addDriver()">+</div>
-                                    <div class="custom-action-btn custom-delete-btn" ng-click="deleteDriver($index)" ng-if="$index > 0">−</div>
                                 </td>
                             </tr>
                         </tbody>

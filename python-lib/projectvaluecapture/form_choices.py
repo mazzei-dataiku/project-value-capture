@@ -86,6 +86,8 @@ def build_form_choices_response(plugin_config: Any) -> dict[str, Any]:
     return {
         "projTypes": proj_types,
 
+        "enable_snowflake_vars": _get_bool(cfg, "enable_snowflake_vars", False),
+
         "fc_gbus_enabled": _get_bool(cfg, "fc_gbus_enabled", True),
         "GBUs": _get_list(cfg, "fc_gbus"),
 

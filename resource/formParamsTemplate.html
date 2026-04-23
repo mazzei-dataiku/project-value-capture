@@ -113,6 +113,54 @@
                     </table>
                 </div>
 
+                <div class="custom-form-group" ng-if="enable_snowflake_vars">
+                    <label>Snowflake Variables (Optional)</label>
+
+                    <div class="custom-form-group">
+                        <label>
+                            <input type="checkbox" ng-model="config.useSnowflakeVars" ng-change="toggleSnowflakeVars()">
+                            Add Snowflake Variables?
+                        </label>
+                    </div>
+
+                    <div class="custom-alert" ng-if="config.useSnowflakeVars && snowflake_warning">{{snowflake_warning}}</div>
+
+                    <table cellspacing="0" class="custom-data-table" ng-if="config.useSnowflakeVars && (config.snowflakeRows || []).length">
+                        <thead>
+                            <tr>
+                                <th>Use?</th>
+                                <th>Connection</th>
+                                <th>Warehouse</th>
+                                <th>Database</th>
+                                <th>Role</th>
+                                <th>Schema</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="r in config.snowflakeRows track by $index">
+                                <td style="text-align:center;"><input type="checkbox" ng-model="r.use" ng-change="recomputeDerived()"></td>
+                                <td>{{r.connection_name}}</td>
+                                <td>
+                                    <input type="text" ng-if="r.warehouse.editable" ng-model="r.warehouse.value" placeholder="Enter warehouse" ng-change="recomputeDerived()">
+                                    <span ng-if="!r.warehouse.editable">{{r.warehouse.value}}</span>
+                                </td>
+                                <td>
+                                    <input type="text" ng-if="r.database.editable" ng-model="r.database.value" placeholder="Enter database" ng-change="recomputeDerived()">
+                                    <span ng-if="!r.database.editable">{{r.database.value}}</span>
+                                </td>
+                                <td>
+                                    <input type="text" ng-if="r.role.editable" ng-model="r.role.value" placeholder="Enter role" ng-change="recomputeDerived()">
+                                    <span ng-if="!r.role.editable">{{r.role.value}}</span>
+                                </td>
+                                <td>
+                                    <input type="text" ng-if="r.schema.editable" ng-model="r.schema.value" placeholder="Enter schema (optional)" ng-change="recomputeDerived()">
+                                    <span ng-if="!r.schema.editable">{{r.schema.value}}</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
                     <label>Value Drivers</label>
                     <table cellspacing="0" class="custom-data-table">

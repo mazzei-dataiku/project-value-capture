@@ -1,7 +1,27 @@
 from __future__ import annotations
 
-from projectvaluecapture.client_builder import create_user_client, enforce_project_create_groups
+from projectvaluecapture.client_builder import (
+    create_admin_client,
+    create_user_client,
+    enforce_project_create_groups,
+)
+from projectvaluecapture.new_project import build_project_key
+from projectvaluecapture.snowflake_vars import (
+    SNOWFLAKE_MAPPING_DATASET_DEFAULT,
+    read_snowflake_mapping_rows,
+)
 from projectvaluecapture.form_choices import build_form_choices_response
+
+
+def _get_bool(cfg, key: str, default: bool = False) -> bool:
+    value = (cfg or {}).get(key, default)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y"}
+    if isinstance(value, int):
+        return value != 0
+    return default
 
 
 def do(payload, config, plugin_config, inputs):
@@ -27,6 +47,83 @@ def do(payload, config, plugin_config, inputs):
         enforce_project_create_groups(user_client, plugin_config)
     except Exception as e:
         return {"authorized": False, "auth_error": str(e)}
+
+    # Snowflake action endpoint (loads mapping rows for UI table)
+    action = (payload or {}).get("action") if isinstance(payload, dict) else None
+    if action == "snowflake":
+        if not _get_bool(plugin_config, "enable_snowflake_vars", False):
+            return {"enable_snowflake_vars": False, "snowflake_rows": []}
+
+        # Scope to user-visible Snowflake connections
+        try:
+            user_connections = user_client.list_connections_names("Snowflake") or []
+        except Exception:
+            user_connections = []
+
+        if not user_connections:
+            return {
+                "enable_snowflake_vars": True,
+                "snowflake_rows": [],
+                "snowflake_warning": (
+                    "User does not have access to any Snowflake connection. "
+                    "If you feel this is incorrect, please consult your Dataiku Administration Team."
+                ),
+            }
+
+        # Read hub mapping dataset using the admin client
+        admin_client = create_admin_client(plugin_config)
+        hub_name = (plugin_config or {}).get("hub_project_name") or "Project Value Hub"
+        hub_key = build_project_key(str(hub_name), max_len=60)
+        hub_project = admin_client.get_project(hub_key)
+
+        dataset_name = (plugin_config or {}).get("snowflake_vars_dataset_name")
+        if not isinstance(dataset_name, str) or not dataset_name.strip():
+            dataset_name = SNOWFLAKE_MAPPING_DATASET_DEFAULT
+
+        try:
+            existing = {d.get("name") for d in (hub_project.list_datasets() or [])}
+        except Exception:
+            existing = set()
+
+        if dataset_name not in existing:
+            return {
+                "enable_snowflake_vars": True,
+                "snowflake_rows": [],
+                "snowflake_warning": (
+                    "Snowflake variables are enabled, but the mapping dataset "
+                    f"{dataset_name!r} was not found in the hub project. "
+                    "Please consult your Dataiku Administration Team."
+                ),
+            }
+
+        mapping_ds = hub_project.get_dataset(dataset_name)
+        mapping_rows = read_snowflake_mapping_rows(mapping_ds)
+
+        visible = set([c for c in user_connections if isinstance(c, str)])
+        out_rows = []
+        for r in mapping_rows:
+            if r.connection_name in visible:
+                out_rows.append(
+                    {
+                        "connection_name": r.connection_name,
+                        "warehouse": r.warehouse,
+                        "database": r.database,
+                        "role": r.role,
+                        "schema": r.schema,
+                    }
+                )
+
+        if not out_rows:
+            return {
+                "enable_snowflake_vars": True,
+                "snowflake_rows": [],
+                "snowflake_warning": (
+                    "Snowflake variables are enabled, but no Snowflake connections are configured for this feature. "
+                    "If you feel this is incorrect, please consult your Dataiku Administration Team."
+                ),
+            }
+
+        return {"enable_snowflake_vars": True, "snowflake_rows": out_rows}
 
     choices = build_form_choices_response(plugin_config)
 

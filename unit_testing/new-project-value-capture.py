@@ -34,8 +34,17 @@ def main() -> None:
 
     # Keep unit testing config aligned with the current payload contract.
     # The runnable expects zipped lists under these keys.
+    config.setdefault("projName", "Unit Test Project")
+    config.setdefault("projType", "Ad-Hoc")
+    config.setdefault("gbu", "Digital")
+    config.setdefault("finalBusinessOwners", ["Unit Tester"])
+    config.setdefault("finalTechnicalOwners", ["Unit Tester"])
+    config.setdefault("problemStatement", "Unit test")
+    config.setdefault("solutionDescription", "Unit test")
     config.setdefault("finalZippedLinks", config.get("finalZippedLinks") or [])
-    config.setdefault("finalZippedDrivers", config.get("finalZippedDrivers") or [])
+    config.setdefault("finalZippedDrivers", config.get("finalZippedDrivers") or [{"driver": "Increase Revenue", "impact": "Unknown"}])
+    config.setdefault("useSnowflakeVars", False)
+    config.setdefault("snowflakeRows", [])
 
     try:
         runnable = MyRunnable(project_key="DATA_COLLECTION", config=config, plugin_config=plugin_config)

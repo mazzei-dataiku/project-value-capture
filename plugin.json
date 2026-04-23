@@ -53,6 +53,22 @@
             "defaultValue": "projects_intake_bronze"
         },
         {
+            "name": "enable_snowflake_vars",
+            "label": "Enable Snowflake Variables",
+            "type": "BOOLEAN",
+            "description": "If enabled, the macro can prompt for Snowflake connection variables and write them to the created project's global variables.",
+            "mandatory": false,
+            "defaultValue": false
+        },
+        {
+            "name": "snowflake_vars_dataset_name",
+            "label": "Snowflake Vars Mapping Dataset",
+            "type": "STRING",
+            "description": "Dataset name in the hub project containing Snowflake variable mapping (connection_name, warehouse, database, role, schema).",
+            "mandatory": false,
+            "defaultValue": "snowflake_connnection_vars_map"
+        },
+        {
             "name": "project_create_groups",
             "label": "Allowed Project Creator Groups",
             "type": "STRINGS",

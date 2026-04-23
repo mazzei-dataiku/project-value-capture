@@ -11,6 +11,7 @@ from projectvaluecapture.client_builder import (
 from projectvaluecapture.new_project import create_project_with_fallback, ensure_hub_project
 from projectvaluecapture.bronze import append_row, ensure_managed_dataset
 from projectvaluecapture.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
+from projectvaluecapture.snowflake_vars import extract_variable_name, is_variable_token
 
 
 class MyRunnable(Runnable):
@@ -72,9 +73,82 @@ class MyRunnable(Runnable):
 
         project_handle = create_project_with_fallback(self)
 
-        # POC runs should not write to the audit log (intake is for tracking real work).
+        # POC runs should not write to the audit log or apply connection variables.
         if project_type == "POC":
             return {"projectKey": self.project_key, "status": "created", "logged": False}
+
+        # Optional: write Snowflake variables into the created project's global variables.
+        if payload.snowflake_enabled:
+            # Re-read mapping dataset in the hub project.
+            plugin_cfg = getattr(self, "plugin_config", {}) or {}
+            mapping_dataset_name = None
+            if isinstance(plugin_cfg, dict):
+                mapping_dataset_name = plugin_cfg.get("snowflake_vars_dataset_name")
+            if not isinstance(mapping_dataset_name, str) or not mapping_dataset_name.strip():
+                mapping_dataset_name = "snowflake_connnection_vars_map"
+
+            try:
+                mapping_ds = hub_project.get_dataset(mapping_dataset_name)
+                mapping_rows = {}
+                for r in mapping_ds.iter_rows():
+                    if not isinstance(r, dict):
+                        continue
+                    cn = r.get("connection_name")
+                    if isinstance(cn, str) and cn.strip():
+                        mapping_rows[cn.strip()] = r
+            except Exception as e:
+                raise ValueError(
+                    "Snowflake variables are enabled but the mapping dataset could not be read. "
+                    f"Underlying error: {e}"
+                )
+
+            update: dict[str, str] = {}
+            for row in payload.snowflake_rows:
+                if not isinstance(row, dict) or not row.get("use"):
+                    continue
+
+                connection_name = row.get("connection_name")
+                if not isinstance(connection_name, str) or not connection_name.strip():
+                    continue
+
+                mapping = mapping_rows.get(connection_name)
+                if not isinstance(mapping, dict):
+                    continue
+
+                for field in ["warehouse", "database", "role", "schema"]:
+                    token = mapping.get(field)
+                    if not is_variable_token(token):
+                        continue
+
+                    cell = row.get(field) or {}
+                    if not isinstance(cell, dict) or not cell.get("editable"):
+                        continue
+
+                    value = cell.get("value")
+                    if not isinstance(value, str):
+                        value = ""
+                    value = value.strip()
+
+                    if not value:
+                        # schema is optional; others were validated in normalize_payload
+                        continue
+
+                    var_name = extract_variable_name(str(token))
+                    if var_name in update:
+                        raise ValueError(
+                            f"Snowflake variable conflict for {var_name}. "
+                            "Multiple selected connections map to the same variable key."
+                        )
+                    update[var_name] = value
+
+            if update:
+                try:
+                    project_handle.update_variables(update, type="standard")
+                except Exception as e:
+                    raise ValueError(
+                        "Failed to write Snowflake variables to the created project's global variables. "
+                        f"Underlying error: {e}"
+                    )
 
         plugin_cfg = getattr(self, "plugin_config", {}) or {}
 

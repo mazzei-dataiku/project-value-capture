@@ -30,6 +30,13 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     $scope.config.drivers = $scope.config.drivers || [{driver:""}];
     $scope.config.impacts = $scope.config.impacts || [{impact:""}];
 
+    $scope.enable_snowflake_vars = false;
+    $scope.snowflake_rows = [];
+    $scope.snowflake_warning = '';
+
+    $scope.config.useSnowflakeVars = $scope.config.useSnowflakeVars || false;
+    $scope.config.snowflakeRows = $scope.config.snowflakeRows || [];
+
     // --- BACKEND HANDSHAKE ---
     var fetchInitChoices = function() {
         $scope.loadingChoices = true;
@@ -46,6 +53,7 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
 
              $scope.notAuthorized = false;
              $scope.projTypes = data.projTypes;
+             $scope.enable_snowflake_vars = !!data.enable_snowflake_vars;
              $scope.loadingChoices = false;
 
 
@@ -74,7 +82,55 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
 
     fetchInitChoices();
 
+    function isVarToken(s) {
+        return typeof s === 'string' && /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/.test(s.trim());
+    }
+
+    $scope.toggleSnowflakeVars = function() {
+        if (!$scope.config.useSnowflakeVars) {
+            $scope.snowflake_rows = [];
+            $scope.snowflake_warning = '';
+            $scope.config.snowflakeRows = [];
+            recomputeDerived();
+            return;
+        }
+
+        $scope.callPythonDo({action: 'snowflake'}).then(function(data) {
+            $scope.enable_snowflake_vars = !!data.enable_snowflake_vars;
+            $scope.snowflake_warning = data.snowflake_warning || '';
+            $scope.snowflake_rows = data.snowflake_rows || [];
+
+            $scope.config.snowflakeRows = ($scope.snowflake_rows || []).map(function(r) {
+                function initCell(templateValue) {
+                    let template = (templateValue || '').toString();
+                    if (isVarToken(template)) {
+                        return { template: template, value: '', editable: true };
+                    }
+                    return { template: template, value: template, editable: false };
+                }
+
+                return {
+                    use: false,
+                    connection_name: r.connection_name,
+                    warehouse: initCell(r.warehouse),
+                    database: initCell(r.database),
+                    role: initCell(r.role),
+                    schema: initCell(r.schema),
+                };
+            });
+
+            recomputeDerived();
+        }, function(err) {
+            console.error('Backend failed to load Snowflake rows', err);
+            $scope.snowflake_warning = 'Unable to load Snowflake connections. Please consult your Dataiku Administration Team.';
+            $scope.snowflake_rows = [];
+            $scope.config.snowflakeRows = [];
+            recomputeDerived();
+        });
+    };
+
     // --- DYNAMIC TABLE LOGIC ---
+
     $scope.addLink = function() {
         $scope.config.labels.push({label:""});
         $scope.config.links.push({link:""});
@@ -132,11 +188,27 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     }
 
      function validateConfig() {
-         if ($scope.notAuthorized) {
-             $scope.validation_errors = [];
-             $scope.validation_state = {};
-             return;
-         }
+        if ($scope.notAuthorized) {
+            $scope.validation_errors = [];
+            $scope.validation_state = {};
+            return;
+        }
+
+        if ($scope.loadingChoices) {
+            $scope.validation_errors = [];
+            $scope.validation_state = {};
+            return;
+        }
+
+        let snowflakeWarn = false;
+        if ($scope.enable_snowflake_vars && $scope.config.useSnowflakeVars) {
+            let rows = $scope.config.snowflakeRows || [];
+            let selected = rows.filter(function(r) { return r && r.use; });
+            if (selected.length === 0) {
+                snowflakeWarn = true;
+            }
+        }
+
 
          let errors = [];
          let state = {};
@@ -208,6 +280,35 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
                     errors.push('At least one Value Driver is required.');
                 }
             }
+
+            // Snowflake vars validation (only when enabled + opted-in)
+            if ($scope.enable_snowflake_vars && $scope.config.useSnowflakeVars) {
+                let rows = $scope.config.snowflakeRows || [];
+                let selected = rows.filter(function(r) { return r && r.use; });
+                selected.forEach(function(r) {
+                    let cn = r.connection_name || '';
+
+                    function requireField(cell, label) {
+                        if (!cell || !cell.editable) {
+                            return;
+                        }
+                        let v = (cell.value || '').toString().trim();
+                        if (!v) {
+                            errors.push('Snowflake ' + label + ' is required for ' + cn + '.');
+                        }
+                    }
+
+                    requireField(r.warehouse, 'warehouse');
+                    requireField(r.database, 'database');
+                    requireField(r.role, 'role');
+                    // schema is optional
+                });
+            }
+        }
+
+        if (snowflakeWarn) {
+            // Warning only; do not block project creation.
+            errors.push('Snowflake variables enabled but no connections selected.');
         }
 
         $scope.validation_errors = errors;

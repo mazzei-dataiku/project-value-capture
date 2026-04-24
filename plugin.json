@@ -13,6 +13,12 @@
     },
     "params": [
         {
+            "name": "sep_admin",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Admin / Hub Configuration</h3>",
+            "type": "SEPARATOR"
+        },
+        {
             "name": "admin_api_token",
             "label": "Admin API Token",
             "type": "PASSWORD",
@@ -53,6 +59,26 @@
             "defaultValue": "projects_intake_bronze"
         },
         {
+            "name": "sep_access",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Access Control</h3>",
+            "type": "SEPARATOR"
+        },
+        {
+            "name": "project_create_groups",
+            "label": "Allowed Project Creator Groups",
+            "type": "STRINGS",
+            "description": "If set, only users in at least one of these groups can use the macro to create projects. Leave empty to allow everyone.",
+            "mandatory": false,
+            "defaultValue": []
+        },
+        {
+            "name": "sep_addons",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Optional Add-ons</h3>",
+            "type": "SEPARATOR"
+        },
+        {
             "name": "enable_snowflake_vars",
             "label": "Enable Snowflake Variables",
             "type": "BOOLEAN",
@@ -70,12 +96,10 @@
             "visibilityCondition": "model.enable_snowflake_vars"
         },
         {
-            "name": "project_create_groups",
-            "label": "Allowed Project Creator Groups",
-            "type": "STRINGS",
-            "description": "If set, only users in at least one of these groups can use the macro to create projects. Leave empty to allow everyone.",
-            "mandatory": false,
-            "defaultValue": []
+            "name": "sep_form",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Form Options</h3>",
+            "type": "SEPARATOR"
         },
         {
             "name": "fc_proj_types",

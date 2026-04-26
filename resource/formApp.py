@@ -58,17 +58,17 @@ def do(payload, config, plugin_config, inputs):
             if not isinstance(props, dict):
                 props = {}
 
-            prefix = "project-value-capture.snowflake.var."
+            var_names = (payload or {}).get("var_names") if isinstance(payload, dict) else None
+            if not isinstance(var_names, list):
+                var_names = []
+
             out: dict[str, str] = {}
-            for k, v in props.items():
-                if not isinstance(k, str) or not k.startswith(prefix):
+            for var_name in var_names:
+                if not isinstance(var_name, str) or not var_name.strip():
                     continue
-                if not isinstance(v, str):
-                    continue
-                var_name = k[len(prefix) :]
-                if not var_name:
-                    continue
-                out[var_name] = v
+                value = props.get(var_name)
+                if isinstance(value, str) and value.strip():
+                    out[var_name] = value
 
             return {"vars": out}
         except Exception as e:

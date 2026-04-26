@@ -128,7 +128,26 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
         if (!$scope.config.useSnowflakeVars || !$scope.config.loadSnowflakeFromProfile) {
             return;
         }
-        $scope.callPythonDo({action: 'snowflake_profile'}).then(function(data) {
+        let varNames = [];
+        let seen = {};
+        ($scope.config.snowflakeRows || []).forEach(function(r) {
+            if (!r) {
+                return;
+            }
+            ['warehouse', 'database', 'role', 'schema'].forEach(function(field) {
+                let cell = r[field];
+                if (!cell || !cell.editable) {
+                    return;
+                }
+                let varName = extractVarName(cell.template);
+                if (varName && !seen[varName]) {
+                    seen[varName] = true;
+                    varNames.push(varName);
+                }
+            });
+        });
+
+        $scope.callPythonDo({action: 'snowflake_profile', var_names: varNames}).then(function(data) {
             if (data && data.profile_warning) {
                 $scope.snowflake_warning = data.profile_warning;
             }

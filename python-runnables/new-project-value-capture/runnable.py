@@ -81,7 +81,6 @@ class MyRunnable(Runnable):
             try:
                 own_settings = self.user_client.get_own_user().get_settings()
                 props = own_settings.user_properties
-                prefix = "project-value-capture.snowflake.var."
 
                 for row in payload.snowflake_rows:
                     if not isinstance(row, dict) or not row.get("use"):
@@ -103,7 +102,7 @@ class MyRunnable(Runnable):
                             continue
 
                         var_name = extract_variable_name(str(template))
-                        props[prefix + var_name] = value
+                        props[var_name] = value
 
                 own_settings.save()
             except Exception:

@@ -335,8 +335,6 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
                 }
             }
 
-            if ($scope.config.projType === 'Industrialization') {
-
             if ($scope.fc_gbus_enabled) {
                 let gbuOk = ($scope.config.gbu || '').trim().length > 0;
                 state.gbu = !gbuOk;

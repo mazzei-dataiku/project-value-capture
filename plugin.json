@@ -184,6 +184,29 @@
             ]
         },
         {
+            "name": "sep_apm",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>APM ID Rules</h3>",
+            "type": "SEPARATOR"
+        },
+        {
+            "name": "apm_id_enabled",
+            "label": "Enable APM ID",
+            "type": "BOOLEAN",
+            "description": "If enabled, the macro can show/require the APM ID field based on project type.",
+            "mandatory": true,
+            "defaultValue": false
+        },
+        {
+            "name": "apm_id_project_types",
+            "label": "APM ID Project Types",
+            "type": "STRINGS",
+            "description": "Project Type values that should show/require APM ID when APM ID is enabled.",
+            "mandatory": false,
+            "visibilityCondition": "model.apm_id_enabled",
+            "defaultValue": []
+        },
+        {
             "name": "fc_value_drivers_enabled",
             "label": "Enable Value Drivers",
             "type": "BOOLEAN",

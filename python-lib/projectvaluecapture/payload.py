@@ -22,6 +22,8 @@ class NormalizedPayload:
     links: list[dict[str, str]]
     value_drivers: list[dict[str, Any]]
     snowflake_enabled: bool
+    snowflake_load_profile: bool
+    snowflake_save_profile: bool
     snowflake_rows: list[dict[str, Any]]
     raw_payload: dict[str, Any]
 
@@ -142,7 +144,7 @@ def _normalize_snowflake_rows(value: Any) -> list[dict[str, Any]]:
     return out
 
 
-def normalize_payload(config: dict[str, Any]) -> NormalizedPayload:
+def normalize_payload(config: dict[str, Any], plugin_config: dict[str, Any] | None = None) -> NormalizedPayload:
     # Required always
     project_name = _require_non_empty_str(config.get("projName"), "projName")
     project_type = _require_non_empty_str(config.get("projType"), "projType")
@@ -150,6 +152,14 @@ def normalize_payload(config: dict[str, Any]) -> NormalizedPayload:
     # Snowflake vars (optional, validated below)
     snowflake_enabled = _require_bool(config.get("useSnowflakeVars"), "useSnowflakeVars")
     snowflake_rows = _normalize_snowflake_rows(config.get("snowflakeRows"))
+
+    # Optional user-profile helpers for Snowflake vars
+    snowflake_load_profile = _require_bool(
+        config.get("loadSnowflakeFromProfile"), "loadSnowflakeFromProfile"
+    )
+    snowflake_save_profile = _require_bool(
+        config.get("saveSnowflakeToProfile"), "saveSnowflakeToProfile"
+    )
 
     # Required for certain project types
     apm_id = _optional_str(config.get("idAPM"))
@@ -165,9 +175,19 @@ def normalize_payload(config: dict[str, Any]) -> NormalizedPayload:
 
     value_drivers = _normalize_value_drivers(config.get("finalZippedDrivers"))
 
-    # Mirror existing rules in runnable.py
-    if project_type in ["Ad-Hoc", "Industrialization"]:
-        if project_type == "Industrialization" and not apm_id:
+    plugin_cfg = plugin_config or {}
+    apm_enabled = bool(plugin_cfg.get("apm_id_enabled"))
+    apm_types = plugin_cfg.get("apm_id_project_types")
+    if not isinstance(apm_types, list):
+        apm_types = []
+    apm_types_norm = {
+        str(t).strip().lower() for t in apm_types if isinstance(t, str) and t.strip()
+    }
+    needs_apm = apm_enabled and project_type.strip().lower() in apm_types_norm
+
+    # Mirror existing rules in runnable.py / form: any non-POC requires full intake details.
+    if project_type != "POC":
+        if needs_apm and not apm_id:
             raise ValueError("You forgot to provide your APM ID. Please fix to proceed.")
         if not gbu:
             raise ValueError("You forgot to select a GBU. Please fix to proceed.")
@@ -216,6 +236,8 @@ def normalize_payload(config: dict[str, Any]) -> NormalizedPayload:
         links=links,
         value_drivers=value_drivers,
         snowflake_enabled=snowflake_enabled,
+        snowflake_load_profile=snowflake_load_profile,
+        snowflake_save_profile=snowflake_save_profile,
         snowflake_rows=snowflake_rows,
         raw_payload=config,
     )

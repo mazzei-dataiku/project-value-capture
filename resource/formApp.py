@@ -48,8 +48,35 @@ def do(payload, config, plugin_config, inputs):
     except Exception as e:
         return {"authorized": False, "auth_error": str(e)}
 
-    # Snowflake action endpoint (loads mapping rows for UI table)
+    # Snowflake action endpoints (loads mapping rows / profile helpers)
     action = (payload or {}).get("action") if isinstance(payload, dict) else None
+
+    if action == "snowflake_profile":
+        try:
+            own = user_client.get_own_user().get_settings()
+            props = own.user_properties or {}
+            if not isinstance(props, dict):
+                props = {}
+
+            prefix = "project-value-capture.snowflake.var."
+            out: dict[str, str] = {}
+            for k, v in props.items():
+                if not isinstance(k, str) or not k.startswith(prefix):
+                    continue
+                if not isinstance(v, str):
+                    continue
+                var_name = k[len(prefix) :]
+                if not var_name:
+                    continue
+                out[var_name] = v
+
+            return {"vars": out}
+        except Exception as e:
+            return {
+                "vars": {},
+                "profile_warning": f"Unable to load Snowflake defaults from user profile ({e}).",
+            }
+
     if action == "snowflake":
         # Never raise from the form backend for this action: failures should be shown
         # as a user-friendly warning instead of a stack trace.

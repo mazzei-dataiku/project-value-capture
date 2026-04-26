@@ -39,12 +39,12 @@
                 </div>
             </div>
 
-            <div class="custom-hidden-section" ng-show="config.projType === 'Industrialization' || config.projType === 'Ad-Hoc'">
+            <div class="custom-hidden-section" ng-show="config.projType && config.projType !== 'POC'">
                 <div class="custom-form-row">
-                    <div ng-show="config.projType === 'Industrialization'" class="custom-form-group custom-half-width">
+                    <div ng-if="apm_id_enabled && config.projType && config.projType !== 'POC' && apm_id_project_types.indexOf(config.projType) !== -1" class="custom-form-group custom-half-width">
                         <label>APM ID:</label>
                         <input type="text" ng-model="config.idAPM" placeholder="APM ID from system" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.idAPM}">
-                        <div class="custom-error-text" ng-if="validation_state.idAPM">Required for Industrialization</div>
+                        <div class="custom-error-text" ng-if="validation_state.idAPM">Required</div>
                     </div>
 
                     <div class="custom-form-group custom-half-width" ng-if="fc_gbus_enabled">
@@ -117,7 +117,7 @@
                 </div>
 
 
-                <div class="custom-form-group" ng-if="fc_value_drivers_enabled">
+                <div class="custom-form-group" ng-if="fc_value_drivers_enabled && config.projType && config.projType !== 'POC'">
                     <div class="custom-section-separator"></div>
                     <label>Value Drivers</label>
                     <table cellspacing="0" class="custom-data-table custom-data-table-3col">
@@ -163,9 +163,9 @@
                     </table>
                 </div>
 
-                <div class="custom-section-separator" ng-if="enable_snowflake_vars"></div>
+                <div class="custom-section-separator" ng-if="enable_snowflake_vars && config.projType && config.projType !== 'POC'"></div>
 
-                <div class="custom-form-group" ng-if="enable_snowflake_vars">
+                <div class="custom-form-group" ng-if="enable_snowflake_vars && config.projType && config.projType !== 'POC'">
                     <label>Snowflake Variables (Optional)</label>
 
                     <div class="custom-form-group">
@@ -173,6 +173,21 @@
                             <input type="checkbox" ng-model="config.useSnowflakeVars" ng-change="toggleSnowflakeVars()">
                             Add Snowflake Variables?
                         </label>
+                    </div>
+
+                    <div class="custom-form-row" ng-if="config.useSnowflakeVars">
+                        <div class="custom-form-group custom-half-width">
+                            <label>
+                                <input type="checkbox" ng-model="config.loadSnowflakeFromProfile" ng-change="loadSnowflakeFromProfile()">
+                                Load from User Profile
+                            </label>
+                        </div>
+                        <div class="custom-form-group custom-half-width">
+                            <label>
+                                <input type="checkbox" ng-model="config.saveSnowflakeToProfile" ng-change="recomputeDerived()">
+                                Save to User Profile
+                            </label>
+                        </div>
                     </div>
 
                     <div class="custom-alert" ng-if="config.useSnowflakeVars && snowflake_warning">{{snowflake_warning}}</div>

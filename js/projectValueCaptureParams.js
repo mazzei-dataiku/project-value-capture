@@ -35,6 +35,8 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     $scope.snowflake_warning = '';
 
     $scope.config.useSnowflakeVars = $scope.config.useSnowflakeVars || false;
+    $scope.config.loadSnowflakeFromProfile = $scope.config.loadSnowflakeFromProfile || false;
+    $scope.config.saveSnowflakeToProfile = $scope.config.saveSnowflakeToProfile || false;
     $scope.config.snowflakeRows = $scope.config.snowflakeRows || [];
 
     // --- BACKEND HANDSHAKE ---
@@ -55,7 +57,10 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
              $scope.projTypes = data.projTypes;
              $scope.enable_snowflake_vars = !!data.enable_snowflake_vars;
              $scope.loadingChoices = false;
-
+ 
+ 
+            $scope.apm_id_enabled = !!data.apm_id_enabled;
+            $scope.apm_id_project_types = data.apm_id_project_types || [];
 
             $scope.fc_gbus_enabled = data.fc_gbus_enabled;
             $scope.gbuOptions = data.GBUs;
@@ -86,11 +91,65 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
         return typeof s === 'string' && /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/.test(s.trim());
     }
 
+    function extractVarName(token) {
+        let s = (token || '').toString().trim();
+        let m = /^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$/.exec(s);
+        return m ? m[1] : null;
+    }
+
+    function applySnowflakeProfileDefaults(defaults) {
+        let vars = (defaults && defaults.vars && typeof defaults.vars === 'object') ? defaults.vars : {};
+
+        ($scope.config.snowflakeRows || []).forEach(function(r) {
+            if (!r) {
+                return;
+            }
+
+            ['warehouse', 'database', 'role', 'schema'].forEach(function(field) {
+                let cell = r[field];
+                if (!cell || !cell.editable) {
+                    return;
+                }
+
+                let varName = extractVarName(cell.template);
+                if (!varName) {
+                    return;
+                }
+
+                let v = vars[varName];
+                if (typeof v === 'string') {
+                    cell.value = v;
+                }
+            });
+        });
+    }
+
+    $scope.loadSnowflakeFromProfile = function() {
+        if (!$scope.config.useSnowflakeVars || !$scope.config.loadSnowflakeFromProfile) {
+            return;
+        }
+        $scope.callPythonDo({action: 'snowflake_profile'}).then(function(data) {
+            if (data && data.profile_warning) {
+                $scope.snowflake_warning = data.profile_warning;
+            }
+            applySnowflakeProfileDefaults(data);
+            $scope.config.loadSnowflakeFromProfile = false;
+            recomputeDerived();
+        }, function(err) {
+            console.error('Backend failed to load user profile Snowflake defaults', err);
+            $scope.snowflake_warning = 'Unable to load Snowflake defaults from user profile.';
+            $scope.config.loadSnowflakeFromProfile = false;
+            recomputeDerived();
+        });
+    };
+
     $scope.toggleSnowflakeVars = function() {
         if (!$scope.config.useSnowflakeVars) {
             $scope.snowflake_rows = [];
             $scope.snowflake_warning = '';
             $scope.config.snowflakeRows = [];
+            $scope.config.loadSnowflakeFromProfile = false;
+            $scope.config.saveSnowflakeToProfile = false;
             recomputeDerived();
             return;
         }
@@ -118,6 +177,11 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
                     schema: initCell(r.schema),
                 };
             });
+
+            if ($scope.config.loadSnowflakeFromProfile) {
+                $scope.loadSnowflakeFromProfile();
+                return;
+            }
 
             recomputeDerived();
         }, function(err) {
@@ -153,15 +217,29 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     };
 
     function buildOwners(selected, customText) {
-        let final = angular.copy(selected || []);
-        let idx = final.indexOf('Other');
-        if (idx !== -1) {
-            if (customText && customText.trim()) {
-                final[idx] = customText.trim();
-            }
+         let final = angular.copy(selected || []);
+         let idx = final.indexOf('Other');
+         if (idx !== -1) {
+             if (customText && customText.trim()) {
+                 final[idx] = customText.trim();
+             }
+         }
+         return final.filter(function(v) { return typeof v === 'string' && v.trim(); });
+     }
+
+    function typeMatches(projectType, allowedTypes) {
+        if (!projectType || typeof projectType !== 'string') {
+            return false;
         }
-        return final.filter(function(v) { return typeof v === 'string' && v.trim(); });
+        if (!Array.isArray(allowedTypes) || allowedTypes.length === 0) {
+            return false;
+        }
+        let pt = projectType.trim().toLowerCase();
+        return allowedTypes.some(function(t) {
+            return typeof t === 'string' && t.trim().toLowerCase() === pt;
+        });
     }
+
 
     function zipLinks(labels, links) {
         let out = [];
@@ -226,16 +304,19 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
             errors.push('Project Type is required.');
         }
 
-        let needsFull = $scope.config.projType === 'Industrialization' || $scope.config.projType === 'Ad-Hoc';
+        let needsFull = !!$scope.config.projType && $scope.config.projType !== 'POC';
 
         if (needsFull) {
-            if ($scope.config.projType === 'Industrialization') {
+            let needsApm = $scope.apm_id_enabled && typeMatches($scope.config.projType, $scope.apm_id_project_types);
+            if (needsApm) {
                 let apmOk = ($scope.config.idAPM || '').trim().length > 0;
                 state.idAPM = !apmOk;
                 if (!apmOk) {
-                    errors.push('APM ID is required for Industrialization.');
+                    errors.push('APM ID is required for the selected Project Type.');
                 }
             }
+
+            if ($scope.config.projType === 'Industrialization') {
 
             if ($scope.fc_gbus_enabled) {
                 let gbuOk = ($scope.config.gbu || '').trim().length > 0;

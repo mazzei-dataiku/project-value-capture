@@ -56,7 +56,7 @@ class MyRunnable(Runnable):
                     self.plugin_config["admin_api_token"] = token_from_config.strip()
             self.admin_client = create_admin_client(self.plugin_config)
 
-        payload = normalize_payload(self.config or {})
+        payload = normalize_payload(self.config or {}, plugin_config=self.plugin_config if isinstance(self.plugin_config, dict) else None)
 
         # Ensure the hub project exists (creates it if missing).
         hub_project = ensure_hub_project(self)
@@ -77,6 +77,39 @@ class MyRunnable(Runnable):
 
         project_handle = create_project_with_fallback(self)
 
+        if payload.snowflake_save_profile and payload.snowflake_enabled:
+            try:
+                own_settings = self.user_client.get_own_user().get_settings()
+                props = own_settings.user_properties
+                prefix = "project-value-capture.snowflake.var."
+
+                for row in payload.snowflake_rows:
+                    if not isinstance(row, dict) or not row.get("use"):
+                        continue
+                    for field in ["warehouse", "database", "role", "schema"]:
+                        cell = row.get(field) or {}
+                        if not isinstance(cell, dict) or not cell.get("editable"):
+                            continue
+
+                        template = cell.get("template")
+                        if not is_variable_token(template):
+                            continue
+
+                        value = cell.get("value")
+                        if not isinstance(value, str):
+                            continue
+                        value = value.strip()
+                        if not value:
+                            continue
+
+                        var_name = extract_variable_name(str(template))
+                        props[prefix + var_name] = value
+
+                own_settings.save()
+            except Exception:
+                # Best effort: profile save should not block project creation.
+                pass
+
         # POC runs should not write to the audit log or apply connection variables.
         if project_type == "POC":
             return {"projectKey": self.project_key, "status": "created", "logged": False}
@@ -94,7 +127,12 @@ class MyRunnable(Runnable):
             try:
                 mapping_ds = hub_project.get_dataset(mapping_dataset_name)
                 mapping_rows = {
-                    r.connection_name.strip().lower(): r
+                    r.connection_name.strip().lower(): {
+                        "warehouse": r.warehouse,
+                        "database": r.database,
+                        "role": r.role,
+                        "schema": r.schema,
+                    }
                     for r in read_snowflake_mapping_rows(mapping_ds)
                     if isinstance(r.connection_name, str) and r.connection_name.strip()
                 }

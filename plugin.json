@@ -73,29 +73,6 @@
             "defaultValue": []
         },
         {
-            "name": "sep_addons",
-            "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Optional Add-ons</h3>",
-            "type": "SEPARATOR"
-        },
-        {
-            "name": "enable_snowflake_vars",
-            "label": "Enable Snowflake Variables",
-            "type": "BOOLEAN",
-            "description": "If enabled, the macro can prompt for Snowflake connection variables and write them to the created project's global variables.",
-            "mandatory": false,
-            "defaultValue": false
-        },
-        {
-            "name": "snowflake_vars_dataset_name",
-            "label": "Snowflake Vars Mapping Dataset",
-            "type": "STRING",
-            "description": "Dataset name in the hub project containing Snowflake variable mapping (connection_name, warehouse, database, role, schema).",
-            "mandatory": false,
-            "defaultValue": "snowflake_connnection_vars_map",
-            "visibilityCondition": "model.enable_snowflake_vars"
-        },
-        {
             "name": "sep_form",
             "label": "",
             "description": "<hr color='#000000' size='2' noshade><h3>Form Options</h3>",
@@ -274,6 +251,29 @@
                 "Increase Revenue",
                 "Decrease Costs"
             ]
+        },
+        {
+            "name": "sep_addons",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Optional Add-ons</h3>",
+            "type": "SEPARATOR"
+        },
+        {
+            "name": "enable_snowflake_vars",
+            "label": "Enable Snowflake Variables",
+            "type": "BOOLEAN",
+            "description": "If enabled, the macro can prompt for Snowflake connection variables and write them to the created project's global variables.",
+            "mandatory": false,
+            "defaultValue": false
+        },
+        {
+            "name": "snowflake_vars_dataset_name",
+            "label": "Snowflake Vars Mapping Dataset",
+            "type": "STRING",
+            "description": "Dataset name in the hub project containing Snowflake variable mapping (connection_name, warehouse, database, role, schema).",
+            "mandatory": false,
+            "defaultValue": "snowflake_connnection_vars_map",
+            "visibilityCondition": "model.enable_snowflake_vars"
         }
     ]
 }

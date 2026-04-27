@@ -73,9 +73,9 @@
             "defaultValue": []
         },
         {
-            "name": "sep_form",
+            "name": "sep_info",
             "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Form Options</h3>",
+            "description": "<hr color='#000000' size='2' noshade><h3>Contact Information</h3>",
             "type": "SEPARATOR"
         },
         {
@@ -101,6 +101,12 @@
             "description": "Shown at the top of the form when non-empty (e.g. Teams/Slack channel). Leave blank to hide.",
             "mandatory": false,
             "defaultValue": ""
+        },
+        {
+            "name": "sep_form",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Access Control</h3>",
+            "type": "SEPARATOR"
         },
         {
             "name": "fc_proj_types",

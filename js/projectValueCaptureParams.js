@@ -62,14 +62,24 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
             $scope.apm_id_enabled = !!data.apm_id_enabled;
             $scope.apm_id_project_types = data.apm_id_project_types || [];
 
-            $scope.fc_gbus_enabled = data.fc_gbus_enabled;
-            $scope.gbuOptions = data.GBUs;
+             $scope.fc_gbus_enabled = data.fc_gbus_enabled;
+             $scope.gbuOptions = data.GBUs;
 
-            $scope.fc_business_users_enabled = data.fc_business_users_enabled;
-            $scope.usersA = data.businessUsers;
+             $scope.fc_business_users_enabled = data.fc_business_users_enabled;
+             $scope.fc_technical_users_enabled = data.fc_technical_users_enabled;
 
-            $scope.fc_technical_users_enabled = data.fc_technical_users_enabled;
-            $scope.usersB = data.technicalUsers;
+             $scope.gbu_settings_map = data.gbu_settings_map || {};
+
+             // Owner options are derived from selected GBU.
+             $scope.usersA = [];
+             $scope.usersB = [];
+
+             if (($scope.config.gbu || '').toString().trim()) {
+                 $scope.applyGbuOwners();
+             } else {
+                 recomputeDerived();
+             }
+
 
             $scope.fc_value_drivers_enabled = data.fc_value_drivers_enabled;
             $scope.driverOptions = data.valueDrivers;
@@ -162,16 +172,59 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
         });
     };
 
-    $scope.toggleSnowflakeVars = function() {
-        if (!$scope.config.useSnowflakeVars) {
-            $scope.snowflake_rows = [];
-            $scope.snowflake_warning = '';
-            $scope.config.snowflakeRows = [];
-            $scope.config.loadSnowflakeFromProfile = false;
-            $scope.config.saveSnowflakeToProfile = false;
-            recomputeDerived();
-            return;
-        }
+     function ensureOtherOnlyIfEmpty(values) {
+         let out = [];
+         if (Array.isArray(values)) {
+             values.forEach(function(v) {
+                 if (typeof v === 'string' && v.trim()) {
+                     out.push(v.trim());
+                 }
+             });
+         }
+
+         let hasOther = out.indexOf('Other') !== -1;
+         if (out.length === 0) {
+             return ['Other'];
+         }
+         if (!hasOther) {
+             out.push('Other');
+         }
+         return out;
+     }
+
+     $scope.applyGbuOwners = function() {
+         let gbu = ($scope.config.gbu || '').toString().trim();
+         let mapping = $scope.gbu_settings_map || {};
+         let conf = mapping[gbu] || {};
+
+         $scope.usersA = ensureOtherOnlyIfEmpty(conf.businessUsers);
+         $scope.usersB = ensureOtherOnlyIfEmpty(conf.technicalUsers);
+
+         let prev = $scope._last_gbu_for_owners;
+         $scope._last_gbu_for_owners = gbu;
+
+         // Clear selected owners only when user changes GBU.
+         if (typeof prev === 'string' && prev !== gbu) {
+             $scope.config.businessOwner = [];
+             $scope.config.technicalOwner = [];
+             $scope.config.customBusinessOwner = '';
+             $scope.config.customTechnicalOwner = '';
+         }
+
+         recomputeDerived();
+     };
+
+     $scope.toggleSnowflakeVars = function() {
+         if (!$scope.config.useSnowflakeVars) {
+             $scope.snowflake_rows = [];
+             $scope.snowflake_warning = '';
+             $scope.config.snowflakeRows = [];
+             $scope.config.loadSnowflakeFromProfile = false;
+             $scope.config.saveSnowflakeToProfile = false;
+             recomputeDerived();
+             return;
+         }
+
 
         $scope.callPythonDo({action: 'snowflake'}).then(function(data) {
             $scope.enable_snowflake_vars = !!data.enable_snowflake_vars;
@@ -343,21 +396,22 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
                 }
             }
 
-            if ($scope.fc_business_users_enabled) {
-                let businessOk = Array.isArray($scope.config.finalBusinessOwners) && $scope.config.finalBusinessOwners.length > 0;
-                state.businessOwner = !businessOk;
-                if (!businessOk) {
-                    errors.push('At least one Business Owner is required.');
-                }
-            }
+             if ($scope.fc_business_users_enabled) {
+                 let businessOk = Array.isArray($scope.config.finalBusinessOwners) && $scope.config.finalBusinessOwners.length > 0;
+                 state.businessOwner = !businessOk;
+                 if (!businessOk) {
+                     errors.push('At least one Business Owner is required.');
+                 }
+             }
 
-            if ($scope.fc_technical_users_enabled) {
-                let technicalOk = Array.isArray($scope.config.finalTechnicalOwners) && $scope.config.finalTechnicalOwners.length > 0;
-                state.technicalOwner = !technicalOk;
-                if (!technicalOk) {
-                    errors.push('At least one Technical Owner is required.');
-                }
-            }
+             if ($scope.fc_technical_users_enabled) {
+                 let technicalOk = Array.isArray($scope.config.finalTechnicalOwners) && $scope.config.finalTechnicalOwners.length > 0;
+                 state.technicalOwner = !technicalOk;
+                 if (!technicalOk) {
+                     errors.push('At least one Technical Owner is required.');
+                 }
+             }
+
 
             let problemOk = ($scope.config.problemStatement || '').trim().length > 0;
             state.problemStatement = !problemOk;

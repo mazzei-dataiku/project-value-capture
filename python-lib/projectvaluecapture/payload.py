@@ -185,14 +185,33 @@ def normalize_payload(config: dict[str, Any], plugin_config: dict[str, Any] | No
     }
     needs_apm = apm_enabled and project_type.strip().lower() in apm_types_norm
 
+    def _plugin_bool(key: str, default: bool = False) -> bool:
+        v = plugin_cfg.get(key, default)
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            return v.strip().lower() in {"1", "true", "yes", "y"}
+        if isinstance(v, int):
+            return v != 0
+        return default
+
     # Mirror existing rules in runnable.py / form: any non-POC requires full intake details.
     if project_type != "POC":
         if needs_apm and not apm_id:
             raise ValueError("You forgot to provide your APM ID. Please fix to proceed.")
-        if not gbu:
-            raise ValueError("You forgot to select a GBU. Please fix to proceed.")
-        business_owners_norm = _require_list_str(business_owners, "finalBusinessOwners")
-        technical_owners_norm = _require_list_str(technical_owners, "finalTechnicalOwners")
+
+        gbu_section_enabled = _plugin_bool("gbu_settings_enabled", _plugin_bool("fc_gbus_enabled", True))
+
+        if gbu_section_enabled:
+            if not gbu:
+                raise ValueError("You forgot to select a GBU. Please fix to proceed.")
+            business_owners_norm = _require_list_str(business_owners, "finalBusinessOwners")
+            technical_owners_norm = _require_list_str(technical_owners, "finalTechnicalOwners")
+        else:
+            gbu = gbu or ""
+            business_owners_norm = [s.strip() for s in business_owners or [] if isinstance(s, str) and s.strip()]
+            technical_owners_norm = [s.strip() for s in technical_owners or [] if isinstance(s, str) and s.strip()]
+
         if not problem_statement:
             raise ValueError("You forgot to provide a Problem Statement. Please fix to proceed.")
         if not solution_description:

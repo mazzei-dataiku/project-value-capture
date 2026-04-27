@@ -191,8 +191,8 @@ def do(payload, config, plugin_config, inputs):
     if not choices.get("projTypes"):
         raise ValueError(
             "Plugin settings are missing form choice lists. "
-            "Expected keys like fc_proj_types, fc_gbus, fc_business_users, "
-            "fc_technical_users, fc_value_drivers, fc_non_fin_impact_levels."
+            "Expected keys like fc_proj_types, gbu_settings (or legacy fc_gbus + fc_*_users), "
+            "fc_value_drivers, fc_non_fin_impact_levels."
         )
 
     return choices

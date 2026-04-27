@@ -113,75 +113,41 @@
             ]
         },
         {
-            "name": "fc_gbus_enabled",
-            "label": "Enable GBUs",
+            "name": "gbu_settings_enabled",
+            "label": "Enable GBU / Owner Mapping",
             "type": "BOOLEAN",
-            "description": "If disabled, hides the GBU field in the macro form",
+            "description": "If disabled, hides the GBU and Owner fields in the macro form",
             "mandatory": true,
             "defaultValue": true
         },
         {
-            "name": "fc_gbus",
-            "label": "GBUs",
-            "type": "STRINGS",
-            "description": "Dropdown options for GBU",
+            "name": "gbu_settings",
+            "label": "GBU Configuration",
+            "type": "OBJECT_LIST",
+            "description": "Define each GBU and its allowed Business/Technical Owners",
             "mandatory": false,
-            "visibilityCondition": "model.fc_gbus_enabled",
-            "defaultValue": [
-                "Corp Functions",
-                "Digital",
-                "Gen Med",
-                "Manufacturing and Supply",
-                "R&D",
-                "Specialty Care",
-                "Vaccines"
-            ]
-        },
-        {
-            "name": "fc_business_users_enabled",
-            "label": "Enable Business Users",
-            "type": "BOOLEAN",
-            "description": "If disabled, hides the Business Owner field in the macro form",
-            "mandatory": true,
-            "defaultValue": true
-        },
-        {
-            "name": "fc_business_users",
-            "label": "Business Users",
-            "type": "STRINGS",
-            "description": "Multi-select options for Business Owner (include 'Other')",
-            "mandatory": false,
-            "visibilityCondition": "model.fc_business_users_enabled",
-            "defaultValue": [
-                "Alice",
-                "Bob",
-                "Chloe",
-                "Dylan",
-                "Other"
-            ]
-        },
-        {
-            "name": "fc_technical_users_enabled",
-            "label": "Enable Technical Users",
-            "type": "BOOLEAN",
-            "description": "If disabled, hides the Technical Owner field in the macro form",
-            "mandatory": true,
-            "defaultValue": true
-        },
-        {
-            "name": "fc_technical_users",
-            "label": "Technical Users",
-            "type": "STRINGS",
-            "description": "Multi-select options for Technical Owner (include 'Other')",
-            "mandatory": false,
-            "visibilityCondition": "model.fc_technical_users_enabled",
-            "defaultValue": [
-                "Erica",
-                "Frank",
-                "Gemma",
-                "Hank",
-                "Other"
-            ]
+            "visibilityCondition": "model.gbu_settings_enabled",
+            "subParams": [
+                {
+                    "name": "gbu_name",
+                    "label": "Business Unit Name",
+                    "type": "STRING",
+                    "description": "e.g. CORP"
+                },
+                {
+                    "name": "business_owners",
+                    "label": "Business Owners",
+                    "type": "STRINGS",
+                    "description": "Add multiple usernames"
+                },
+                {
+                    "name": "technical_owners",
+                    "label": "Technical Owners",
+                    "type": "STRINGS",
+                    "description": "Add multiple usernames"
+                }
+            ],
+            "defaultValue": []
         },
         {
             "name": "sep_apm",

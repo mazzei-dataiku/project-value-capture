@@ -3,8 +3,10 @@ from __future__ import annotations
 from typing import Any
 
 
+def _normalize_string_list(values: Any) -> list[str]:
+    if not isinstance(values, list):
+        return []
 
-def ensure_other_choice(values: list[str]) -> list[str]:
     seen = set()
     out: list[str] = []
     for v in values:
@@ -16,8 +18,6 @@ def ensure_other_choice(values: list[str]) -> list[str]:
         if s not in seen:
             out.append(s)
             seen.add(s)
-    if "Other" not in seen:
-        out.append("Other")
     return out
 
 
@@ -59,10 +59,7 @@ def _unwrap_plugin_config(plugin_config: Any) -> dict[str, Any]:
 
 
 def _get_list(cfg: dict[str, Any], key: str) -> list[str]:
-    value = cfg.get(key)
-    if not isinstance(value, list):
-        return []
-    return [v.strip() for v in value if isinstance(v, str) and v.strip()]
+    return _normalize_string_list(cfg.get(key))
 
 
 def _get_bool(cfg: dict[str, Any], key: str, default: bool = True) -> bool:
@@ -76,12 +73,66 @@ def _get_bool(cfg: dict[str, Any], key: str, default: bool = True) -> bool:
     return default
 
 
+def _extract_gbu_settings(cfg: dict[str, Any]) -> tuple[list[str], dict[str, dict[str, list[str]]]]:
+    """Return (gbu_names, mapping).
+
+    mapping shape: {gbu_name: {"businessUsers": [...], "technicalUsers": [...]}}
+
+    The UI is responsible for appending an "Other" option.
+    """
+
+    raw = cfg.get("gbu_settings")
+    if not isinstance(raw, list):
+        raw = []
+
+    gbus: list[str] = []
+    mapping: dict[str, dict[str, list[str]]] = {}
+
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+
+        gbu_name = item.get("gbu_name")
+        if not isinstance(gbu_name, str) or not gbu_name.strip():
+            continue
+        gbu_name = gbu_name.strip()
+
+        business = _normalize_string_list(item.get("business_owners"))
+        technical = _normalize_string_list(item.get("technical_owners"))
+
+        if gbu_name not in mapping:
+            gbus.append(gbu_name)
+
+        mapping[gbu_name] = {
+            "businessUsers": business,
+            "technicalUsers": technical,
+        }
+
+    # Backward compatibility fallback: old flat lists applied to every GBU.
+    if not mapping:
+        legacy_gbus = _get_list(cfg, "fc_gbus")
+        legacy_business = _get_list(cfg, "fc_business_users")
+        legacy_technical = _get_list(cfg, "fc_technical_users")
+        for g in legacy_gbus:
+            if g not in mapping:
+                gbus.append(g)
+            mapping[g] = {
+                "businessUsers": legacy_business,
+                "technicalUsers": legacy_technical,
+            }
+
+    return gbus, mapping
+
+
 def build_form_choices_response(plugin_config: Any) -> dict[str, Any]:
     cfg = _unwrap_plugin_config(plugin_config)
 
     proj_types = _get_list(cfg, "fc_proj_types")
     if "POC" not in proj_types:
         proj_types.append("POC")
+
+    gbu_enabled = _get_bool(cfg, "gbu_settings_enabled", True)
+    gbus, gbu_settings_map = _extract_gbu_settings(cfg)
 
     return {
         "projTypes": proj_types,
@@ -91,14 +142,15 @@ def build_form_choices_response(plugin_config: Any) -> dict[str, Any]:
         "apm_id_enabled": _get_bool(cfg, "apm_id_enabled", False),
         "apm_id_project_types": _get_list(cfg, "apm_id_project_types"),
 
-        "fc_gbus_enabled": _get_bool(cfg, "fc_gbus_enabled", True),
-        "GBUs": _get_list(cfg, "fc_gbus"),
+        # Keep existing keys used by the UI.
+        "fc_gbus_enabled": gbu_enabled,
+        "GBUs": gbus,
 
-        "fc_business_users_enabled": _get_bool(cfg, "fc_business_users_enabled", True),
-        "businessUsers": ensure_other_choice(_get_list(cfg, "fc_business_users")),
+        "fc_business_users_enabled": gbu_enabled,
+        "fc_technical_users_enabled": gbu_enabled,
 
-        "fc_technical_users_enabled": _get_bool(cfg, "fc_technical_users_enabled", True),
-        "technicalUsers": ensure_other_choice(_get_list(cfg, "fc_technical_users")),
+        # New mapping (used to filter owners by selected GBU).
+        "gbu_settings_map": gbu_settings_map,
 
         "fc_value_drivers_enabled": _get_bool(cfg, "fc_value_drivers_enabled", True),
         "valueDrivers": _get_list(cfg, "fc_value_drivers"),

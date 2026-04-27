@@ -8,7 +8,7 @@ This repository contains a Dataiku DSS plugin that provides a runnable (macro) w
 - `python-runnables/new-project-value-capture/runnable.json`: runnable descriptor (template/module wiring).
 - `resource/formParamsTemplate.html`: AngularJS form template.
 - `js/projectValueCaptureParams.js`: AngularJS controller logic.
-- `resource/formApp.py`: server-side “form setup” returning choice lists from plugin settings (`fc_*`).
+- `resource/formApp.py`: server-side “form setup” returning choice lists from plugin settings.
 - `python-lib/`: shared helper code (importable in DSS plugin runtime).
   - `python-lib/projectvaluecapture/form_choices.py`: maps plugin settings → UI choice lists.
   - `python-lib/projectvaluecapture/payload.py`: normalizes & validates submitted form payload.
@@ -50,7 +50,7 @@ Notes:
 
 Choice lists are expected as top-level lists prefixed with `fc_`:
 
-- `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
+- `fc_proj_types`, `gbu_settings` (preferred), `fc_value_drivers`, `fc_non_fin_impact_levels`
 - `financial_value_drivers` is the subset of drivers that should use numeric USD input in the form.
 
 ## Local configuration directory (Code Studio)

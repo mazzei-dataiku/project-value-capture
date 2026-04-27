@@ -49,7 +49,7 @@
 
                     <div class="custom-form-group custom-half-width" ng-if="fc_gbus_enabled">
                         <label>GBU:</label>
-                        <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options="g for g in gbuOptions" ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.gbu}"></select>
+                        <select dku-bs-select="{liveSearch:true}" ng-model="config.gbu" ng-options="g for g in gbuOptions" ng-change="applyGbuOwners()" ng-class="{'custom-invalid': validation_state.gbu}"></select>
                         <div class="custom-error-text" ng-if="validation_state.gbu">Required</div>
                     </div>
                 </div>

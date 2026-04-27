@@ -4,7 +4,7 @@
     "meta": {
         "label": "Value capture form",
         "description": "Custom project creation macro to enforce value capturing",
-        "author": "valentina.pena@dataiku.com",
+        "author": "Stephen.Mazzei@dataiku.com",
         "icon": "fas fa-plus",
         "recipesCategory": "",
         "tags": [],

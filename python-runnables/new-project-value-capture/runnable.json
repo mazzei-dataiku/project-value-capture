@@ -1,7 +1,7 @@
 {
     "meta": {
-        "label": "New Project",
-        "description": "",
+        "label": "Project Value Intake Form",
+        "description": "Create new projects, capture business value",
         "icon": "fas fa-plus"
     },
     "impersonate": false,

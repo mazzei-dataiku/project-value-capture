@@ -14,7 +14,7 @@
     "params": [
         {
             "name": "sep_admin",
-            "label": "Admin / Hub Configuration<",
+            "label": "",
             "description": "<hr color='#000000' size='2' noshade><h3>Admin / Hub Configuration</h3>",
             "type": "SEPARATOR"
         },

@@ -157,12 +157,6 @@
             "defaultValue": []
         },
         {
-            "name": "sep_apm",
-            "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>APM ID Rules</h3>",
-            "type": "SEPARATOR"
-        },
-        {
             "name": "apm_id_enabled",
             "label": "Enable APM ID",
             "type": "BOOLEAN",

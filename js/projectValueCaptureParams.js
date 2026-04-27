@@ -135,7 +135,7 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     }
 
     $scope.loadSnowflakeFromProfile = function() {
-        if (!$scope.config.useSnowflakeVars || !$scope.config.loadSnowflakeFromProfile) {
+        if (!$scope.config.useSnowflakeVars) {
             return;
         }
         let varNames = [];
@@ -162,12 +162,10 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
                 $scope.snowflake_warning = data.profile_warning;
             }
             applySnowflakeProfileDefaults(data);
-            $scope.config.loadSnowflakeFromProfile = false;
             recomputeDerived();
         }, function(err) {
             console.error('Backend failed to load user profile Snowflake defaults', err);
             $scope.snowflake_warning = 'Unable to load Snowflake defaults from user profile.';
-            $scope.config.loadSnowflakeFromProfile = false;
             recomputeDerived();
         });
     };
@@ -219,7 +217,6 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
              $scope.snowflake_rows = [];
              $scope.snowflake_warning = '';
              $scope.config.snowflakeRows = [];
-             $scope.config.loadSnowflakeFromProfile = false;
              $scope.config.saveSnowflakeToProfile = false;
              recomputeDerived();
              return;

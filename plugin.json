@@ -83,7 +83,7 @@
         {
             "name": "sep_info",
             "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Contact Information</h3>",
+            "description": "<hr color='#000000' size='2' noshade><h3>Form: Contact Information</h3>",
             "type": "SEPARATOR"
         },
         {
@@ -117,7 +117,7 @@
         {
             "name": "sep_form_prj_types",
             "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Project Types</h3>",
+            "description": "<hr color='#000000' size='2' noshade><h3>Form: Project Types</h3>",
             "type": "SEPARATOR"
         },
         {
@@ -138,7 +138,7 @@
         {
             "name": "sep_form_gbus",
             "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Global Business Units</h3>",
+            "description": "<hr color='#000000' size='2' noshade><h3>Form: Global Business Units</h3>",
             "type": "SEPARATOR"
         },
         {
@@ -177,6 +177,15 @@
                 }
             ],
             "defaultValue": []
+        },
+        
+        
+        
+        {
+            "name": "sep_form_values",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Form: Value Addons</h3>",
+            "type": "SEPARATOR"
         },
         {
             "name": "apm_id_enabled",

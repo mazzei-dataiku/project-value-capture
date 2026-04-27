@@ -58,6 +58,10 @@
             "mandatory": true,
             "defaultValue": "projects_intake_bronze"
         },
+        
+        
+        
+        
         {
             "name": "sep_access",
             "label": "",
@@ -72,6 +76,10 @@
             "mandatory": false,
             "defaultValue": []
         },
+        
+        
+        
+        
         {
             "name": "sep_info",
             "label": "",
@@ -102,8 +110,12 @@
             "mandatory": false,
             "defaultValue": ""
         },
+        
+        
+        
+        
         {
-            "name": "sep_form",
+            "name": "sep_form_prj_types",
             "label": "",
             "description": "<hr color='#000000' size='2' noshade><h3>Access Control</h3>",
             "type": "SEPARATOR"

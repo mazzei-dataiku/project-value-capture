@@ -43,6 +43,9 @@ This repo uses a workspace-side config directory (not necessarily shipped with t
   - `fc_proj_types`, `fc_gbus`, `fc_business_users`, `fc_technical_users`, `fc_value_drivers`, `fc_non_fin_impact_levels`
 - Defaults for these lists are defined in plugin settings (`plugin.json`) via `defaultValue`.
 - Admin API key is stored as `admin_api_token` (required; no default).
+- Optional form behavior settings:
+  - `apm_id_enabled` + `apm_id_project_types` control APM ID visibility/requirement.
+  - Snowflake profile load/save uses per-user `userProperties` keyed by variable name.
 
 ## Build / Lint / Test
 

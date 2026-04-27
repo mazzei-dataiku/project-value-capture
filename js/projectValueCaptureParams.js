@@ -59,8 +59,13 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
              $scope.loadingChoices = false;
  
  
-            $scope.apm_id_enabled = !!data.apm_id_enabled;
-            $scope.apm_id_project_types = data.apm_id_project_types || [];
+             $scope.apm_id_enabled = !!data.apm_id_enabled;
+             $scope.apm_id_project_types = data.apm_id_project_types || [];
+
+             $scope.support_wiki_page = data.support_wiki_page || '';
+             $scope.support_admin_contact = data.support_admin_contact || '';
+             $scope.support_user_community = data.support_user_community || '';
+
 
              $scope.fc_gbus_enabled = data.fc_gbus_enabled;
              $scope.gbuOptions = data.GBUs;
@@ -100,6 +105,10 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     function isVarToken(s) {
         return typeof s === 'string' && /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/.test(s.trim());
     }
+
+    $scope.isHttpUrl = function(s) {
+        return typeof s === 'string' && /^https?:\/\//i.test(s.trim());
+    };
 
     function extractVarName(token) {
         let s = (token || '').toString().trim();

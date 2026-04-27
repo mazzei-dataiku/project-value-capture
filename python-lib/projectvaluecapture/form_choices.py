@@ -62,6 +62,13 @@ def _get_list(cfg: dict[str, Any], key: str) -> list[str]:
     return _normalize_string_list(cfg.get(key))
 
 
+def _get_str(cfg: dict[str, Any], key: str) -> str:
+    value = cfg.get(key)
+    if not isinstance(value, str):
+        return ""
+    return value.strip()
+
+
 def _get_bool(cfg: dict[str, Any], key: str, default: bool = True) -> bool:
     value = cfg.get(key, default)
     if isinstance(value, bool):
@@ -136,6 +143,10 @@ def build_form_choices_response(plugin_config: Any) -> dict[str, Any]:
 
     return {
         "projTypes": proj_types,
+
+        "support_wiki_page": _get_str(cfg, "support_wiki_page"),
+        "support_admin_contact": _get_str(cfg, "support_admin_contact"),
+        "support_user_community": _get_str(cfg, "support_user_community"),
 
         "enable_snowflake_vars": _get_bool(cfg, "enable_snowflake_vars", False),
 

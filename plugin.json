@@ -113,6 +113,30 @@
             ]
         },
         {
+            "name": "support_wiki_page",
+            "label": "Wiki Page",
+            "type": "STRING",
+            "description": "Shown as a link at the top of the form when non-empty. Leave blank to hide.",
+            "mandatory": false,
+            "defaultValue": ""
+        },
+        {
+            "name": "support_admin_contact",
+            "label": "Admin Contact",
+            "type": "STRING",
+            "description": "Shown at the top of the form when non-empty (e.g. email/DL). Leave blank to hide.",
+            "mandatory": false,
+            "defaultValue": ""
+        },
+        {
+            "name": "support_user_community",
+            "label": "User Community",
+            "type": "STRING",
+            "description": "Shown at the top of the form when non-empty (e.g. Teams/Slack channel). Leave blank to hide.",
+            "mandatory": false,
+            "defaultValue": ""
+        },
+        {
             "name": "gbu_settings_enabled",
             "label": "Enable GBU / Owner Mapping",
             "type": "BOOLEAN",

@@ -19,6 +19,19 @@
             </div>
 
             <div ng-if="!loadingChoices && !notAuthorized">
+
+            <div class="custom-form-group" ng-if="support_wiki_page || support_admin_contact || support_user_community">
+                <ul style="margin: 0 0 10px 18px;">
+                    <li ng-if="support_wiki_page">
+                        <strong>Wiki Page:</strong>
+                        <span ng-if="!isHttpUrl(support_wiki_page)">{{support_wiki_page}}</span>
+                        <a ng-if="isHttpUrl(support_wiki_page)" ng-href="{{support_wiki_page}}" target="_blank" rel="noopener noreferrer">{{support_wiki_page}}</a>
+                    </li>
+                    <li ng-if="support_admin_contact"><strong>Admin Contact:</strong> {{support_admin_contact}}</li>
+                    <li ng-if="support_user_community"><strong>User Community:</strong> {{support_user_community}}</li>
+                </ul>
+            </div>
+
             <div class="custom-form-group">
                 <label>Project Name:</label>
                 <input type="text" ng-model="config.projName" placeholder="Your project name" required ng-change="recomputeDerived()" ng-class="{'custom-invalid': validation_state.projName}">

@@ -79,17 +79,6 @@
             "type": "SEPARATOR"
         },
         {
-            "name": "fc_proj_types",
-            "label": "Project Types (POC auto-added)",
-            "type": "STRINGS",
-            "description": "Radio options for Project Type. The macro always adds 'POC' (POC prefixes the project name/key and skips intake logging).",
-            "mandatory": true,
-            "defaultValue": [
-                "Ad-Hoc",
-                "Industrialization"
-            ]
-        },
-        {
             "name": "support_wiki_page",
             "label": "Wiki Page",
             "type": "STRING",
@@ -112,6 +101,17 @@
             "description": "Shown at the top of the form when non-empty (e.g. Teams/Slack channel). Leave blank to hide.",
             "mandatory": false,
             "defaultValue": ""
+        },
+        {
+            "name": "fc_proj_types",
+            "label": "Project Types (POC auto-added)",
+            "type": "STRINGS",
+            "description": "Radio options for Project Type. The macro always adds 'POC' (POC prefixes the project name/key and skips intake logging).",
+            "mandatory": true,
+            "defaultValue": [
+                "Ad-Hoc",
+                "Industrialization"
+            ]
         },
         {
             "name": "gbu_settings_enabled",

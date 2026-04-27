@@ -284,10 +284,14 @@
                 "Decrease Costs"
             ]
         },
+        
+        
+        
+        
         {
             "name": "sep_addons",
             "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Optional Add-ons</h3>",
+            "description": "<hr color='#000000' size='2' noshade><h3>Form: Optional Add-ons</h3>",
             "type": "SEPARATOR"
         },
         {

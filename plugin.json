@@ -117,7 +117,7 @@
         {
             "name": "sep_form_prj_types",
             "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Access Control</h3>",
+            "description": "<hr color='#000000' size='2' noshade><h3>Project Types</h3>",
             "type": "SEPARATOR"
         },
         {
@@ -130,6 +130,16 @@
                 "Ad-Hoc",
                 "Industrialization"
             ]
+        },
+        
+        
+        
+        
+        {
+            "name": "sep_form_gbus",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Global Business Units</h3>",
+            "type": "SEPARATOR"
         },
         {
             "name": "gbu_settings_enabled",

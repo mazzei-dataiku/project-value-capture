@@ -189,38 +189,6 @@
             "type": "SEPARATOR"
         },
         {
-            "name": "sep_addon_tables",
-            "label": "",
-            "description": "<hr color='#000000' size='2' noshade><h3>Admin Macro: Add-on Tables</h3>",
-            "type": "SEPARATOR"
-        },
-        {
-            "name": "addon_tables_enabled",
-            "label": "Enable Add-on Tables",
-            "type": "BOOLEAN",
-            "description": "If enabled, the admin macro can create/refresh add-on datasets in the hub project.",
-            "mandatory": true,
-            "defaultValue": true
-        },
-        {
-            "name": "snowflake_addon_dataset_name",
-            "label": "Snowflake Add-on Dataset Name",
-            "type": "STRING",
-            "description": "Name of the dataset (stored in filesystem_managed). Leave blank to disable Snowflake add-on.",
-            "mandatory": false,
-            "visibilityCondition": "model.addon_tables_enabled",
-            "defaultValue": "snowflake_addon_connections"
-        },
-        {
-            "name": "snowflake_addon_spec_json",
-            "label": "Snowflake Add-on Spec (JSON)",
-            "type": "TEXTAREA",
-            "description": "JSON spec describing columns to extract from Snowflake connection definitions. Leave blank to use the built-in default spec.",
-            "mandatory": false,
-            "visibilityCondition": "model.addon_tables_enabled",
-            "defaultValue": "{\n  \"columns\": [\n    {\"name\": \"connection_name\", \"path\": \"name\"},\n    {\"name\": \"type\", \"path\": \"type\"}\n  ]\n}"
-        },
-        {
             "name": "apm_id_enabled",
             "label": "Enable APM ID",
             "type": "BOOLEAN",

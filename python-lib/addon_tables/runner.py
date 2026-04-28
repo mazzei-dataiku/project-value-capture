@@ -6,15 +6,9 @@ from typing import Any
 
 from intake.bronze import _infer_managed_connection
 
-from .specs import ColumnSpec, get_by_path, parse_spec_json
+from .specs import load_params_mapping_yaml
 
 
-DEFAULT_SNOWFLAKE_SPEC = {
-    "columns": [
-        {"name": "connection_name", "path": "name", "default": ""},
-        {"name": "type", "path": "type", "default": ""},
-    ]
-}
 
 
 def _unwrap_plugin_config(plugin_config: Any) -> dict[str, Any]:
@@ -48,9 +42,9 @@ def _get_bool(cfg: dict[str, Any], key: str, default: bool = False) -> bool:
     return default
 
 
-def _schema_from_columns(columns: list[ColumnSpec]) -> list[dict[str, str]]:
+def _schema_from_column_names(names: list[str]) -> list[dict[str, str]]:
     # Keep all values as strings for portability.
-    return [{"name": c.name, "type": "string"} for c in columns]
+    return [{"name": n, "type": "string"} for n in names]
 
 
 def _render_html_result(title: str, details: dict[str, Any]) -> str:
@@ -68,23 +62,18 @@ def build_snowflake_addon_dataset(
     Storage is a managed dataset, stored into the hub project's managed connection
     (same inference logic as the bronze intake dataset).
 
-    The dataset schema/columns are driven by plugin settings `snowflake_addon_spec_json`.
+    The dataset schema/columns are driven by `addon_tables/config/snowflake.yaml`.
     """
 
     cfg = _unwrap_plugin_config(plugin_config)
 
-    if not _get_bool(cfg, "addon_tables_enabled", True):
-        return {"status": "skipped", "reason": "addon_tables_enabled=false"}
-
-    dataset_name = _get_str(cfg, "snowflake_addon_dataset_name")
+    dataset_name = _get_str(cfg, "snowflake_vars_dataset_name")
     if not dataset_name:
-        return {"status": "skipped", "reason": "snowflake_addon_dataset_name empty"}
+        return {"status": "skipped", "reason": "snowflake_vars_dataset_name empty"}
 
-    spec_json = _get_str(cfg, "snowflake_addon_spec_json")
-    columns = parse_spec_json(spec_json)
-    if not columns:
-        # Fall back to default spec.
-        columns = [ColumnSpec(**c) for c in DEFAULT_SNOWFLAKE_SPEC["columns"]]
+    mapping = load_params_mapping_yaml("snowflake")
+    # Mapping of output column name -> raw connection params key
+    column_names = ["connection_name"] + list(mapping.keys())
 
     # Hub project
     from intake.new_project import build_project_key
@@ -112,15 +101,20 @@ def build_snowflake_addon_dataset(
             errors.append(f"Failed to read connection {name!r}: {e}")
             continue
 
-        row: dict[str, str] = {}
-        for col in columns:
-            val = get_by_path(raw, col.path)
-            if val is None:
-                row[col.name] = col.default
-            elif isinstance(val, (dict, list)):
-                row[col.name] = json.dumps(val, sort_keys=True)
+        params = raw.get("params")
+        if not isinstance(params, dict):
+            params = {}
+
+        row: dict[str, str] = {"connection_name": name.strip()}
+        for out_col, params_key in mapping.items():
+            value = params.get(params_key)
+            if value is None:
+                row[out_col] = ""
+            elif isinstance(value, (dict, list)):
+                row[out_col] = json.dumps(value, sort_keys=True)
             else:
-                row[col.name] = str(val)
+                row[out_col] = str(value)
+
         rows.append(row)
 
     # Recreate dataset to match schema exactly
@@ -140,7 +134,7 @@ def build_snowflake_addon_dataset(
     dataset = builder.create(overwrite=False)
 
     settings = dataset.get_settings()
-    for col in _schema_from_columns(columns):
+    for col in _schema_from_column_names(column_names):
         settings.add_raw_schema_column(col)
     settings.save()
 

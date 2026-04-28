@@ -36,7 +36,7 @@ class MyRunnable(Runnable):
                     self.plugin_config["admin_api_token"] = token_from_config.strip()
             self.admin_client = create_admin_client(self.plugin_config)
 
-        build_snowflake = bool((self.config or {}).get("build_snowflake", True))
+        build_snowflake = bool((self.config or {}).get("build_snowflake", False))
 
         try:
             return run_addon_tables_macro(

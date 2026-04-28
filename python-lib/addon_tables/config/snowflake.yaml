@@ -1,0 +1,6 @@
+# Mapping of output column name -> connection params key
+# Format: - {column_name}: {params_key}
+- warehouse: warehouse
+- db: db
+- role: role
+- schema: schema

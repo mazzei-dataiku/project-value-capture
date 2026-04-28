@@ -12,7 +12,7 @@
             "type": "BOOLEAN",
             "description": "Create/refresh the Snowflake connections add-on dataset",
             "mandatory": false,
-            "defaultValue": true
+            "defaultValue": false
         }
     ],
     "permissions": [],

@@ -31,8 +31,9 @@ APM ID can be made conditionally visible/required depending on the selected Proj
 If `enable_snowflake_vars` is enabled, the form can optionally prompt for Snowflake connection variables and write them to the created project's global variables (`standard`).
 
 - The mapping is read from a hub project dataset (`snowflake_vars_dataset_name`, default `snowflake_connnection_vars_map`).
-- Expected columns: `connection_name`, `warehouse`, `database`, `role`, `schema`.
-- Cells using the exact form `${VAR_NAME}` are treated as variable keys and become editable in the form.
+- Expected columns: any columns are supported; a connection identifier column is required (`connection_name` preferred; fallback `connection` or `name`).
+- Cells using the exact form `${VAR_NAME}` become editable inputs in the form.
+- On project creation, only non-empty user inputs for `${VAR_NAME}` cells are written to project variables.
 - Cells not using `${...}` are treated as hard-coded display values and are not written to project variables.
 
 User profile helpers (in the form UI):

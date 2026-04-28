@@ -11,7 +11,7 @@
             "label": "Snowflake",
             "type": "BOOLEAN",
             "description": "Create/refresh the Snowflake connections add-on dataset",
-            "mandatory": true,
+            "mandatory": false,
             "defaultValue": true
         }
     ],

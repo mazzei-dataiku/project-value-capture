@@ -126,6 +126,8 @@ Notes:
 
 ## Editor/Agent Rules
 
+- **Do not edit `plugin.json`** unless the user explicitly requests changes to it.
+
 - No Cursor rules found (`.cursor/rules/` or `.cursorrules` absent).
 - No Copilot instructions found (`.github/copilot-instructions.md` absent).
 

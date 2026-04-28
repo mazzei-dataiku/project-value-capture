@@ -3,15 +3,15 @@ from __future__ import annotations
 import dataiku
 from dataiku.runnables import Runnable
 
-from projectvaluecapture.client_builder import (
+from helpers.client_builder import (
     create_admin_client,
     create_user_client,
     enforce_project_create_groups,
 )
-from projectvaluecapture.new_project import create_project_with_fallback, ensure_hub_project
-from projectvaluecapture.bronze import append_row, ensure_managed_dataset
-from projectvaluecapture.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
-from projectvaluecapture.snowflake_vars import (
+from intake.new_project import create_project_with_fallback, ensure_hub_project
+from intake.bronze import append_row, ensure_managed_dataset
+from intake.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
+from intake.snowflake_vars import (
     extract_variable_name,
     is_variable_token,
     read_snowflake_mapping_rows,

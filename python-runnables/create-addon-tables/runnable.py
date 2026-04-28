@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import html
 
-from projectvaluecapture.client_builder import (
+from helpers.client_builder import (
     create_admin_client,
     create_user_client,
     enforce_project_create_groups,
 )
-from projectvaluecapture.addon_tables.runner import run_addon_tables_macro
+from addon_tables.runner import run_addon_tables_macro
 
 
 from dataiku.runnables import Runnable

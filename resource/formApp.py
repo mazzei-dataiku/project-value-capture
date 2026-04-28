@@ -1,16 +1,19 @@
 from __future__ import annotations
 
-from projectvaluecapture.client_builder import (
+from helpers.client_builder import (
     create_admin_client,
     create_user_client,
     enforce_project_create_groups,
 )
-from projectvaluecapture.new_project import build_project_key
-from projectvaluecapture.snowflake_vars import (
+from intake.new_project import build_project_key
+from intake.snowflake_vars import (
     SNOWFLAKE_MAPPING_DATASET_DEFAULT,
+    extract_variable_name,
+    is_variable_token,
     read_snowflake_mapping_rows,
 )
-from projectvaluecapture.form_choices import build_form_choices_response
+from intake.form_choices import build_form_choices_response
+
 
 
 def _get_bool(cfg, key: str, default: bool = False) -> bool:

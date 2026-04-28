@@ -4,7 +4,7 @@ import html
 import json
 from typing import Any
 
-from projectvaluecapture.bronze import _infer_managed_connection
+from intake.bronze import _infer_managed_connection
 
 from .specs import ColumnSpec, get_by_path, parse_spec_json
 
@@ -87,7 +87,7 @@ def build_snowflake_addon_dataset(
         columns = [ColumnSpec(**c) for c in DEFAULT_SNOWFLAKE_SPEC["columns"]]
 
     # Hub project
-    from projectvaluecapture.new_project import build_project_key
+    from intake.new_project import build_project_key
 
     hub_name = _get_str(cfg, "hub_project_name") or "Project Value Hub"
     hub_key = build_project_key(hub_name, max_len=60)

@@ -10,9 +10,9 @@ This repository contains a Dataiku DSS plugin that provides a runnable (macro) w
 - `js/projectValueCaptureParams.js`: AngularJS controller logic.
 - `resource/formApp.py`: server-side “form setup” returning choice lists from plugin settings.
 - `python-lib/`: shared helper code (importable in DSS plugin runtime).
-  - `python-lib/projectvaluecapture/form_choices.py`: maps plugin settings → UI choice lists.
-  - `python-lib/projectvaluecapture/payload.py`: normalizes & validates submitted form payload.
-  - `python-lib/projectvaluecapture/bronze.py`: creates/appends to the hub “bronze” intake log dataset.
+  - `python-lib/intake/form_choices.py`: maps plugin settings → UI choice lists.
+  - `python-lib/intake/payload.py`: normalizes & validates submitted form payload.
+  - `python-lib/intake/bronze.py`: creates/appends to the hub “bronze” intake log dataset.
 - `unit_testing/new-project-value-capture.py`: minimal local harness to instantiate and run the runnable.
 
 ## Plugin settings
@@ -68,8 +68,8 @@ Notes:
 
 ## Troubleshooting
 
-- **Value Drivers required**: for any project type other than `POC`, at least one value driver is required (validated in `python-lib/projectvaluecapture/payload.py`).
-- **Hub bronze dataset creation requires a connection**: managed dataset creation may require an explicit connection; the plugin infers one and falls back to `filesystem_managed` (see `python-lib/projectvaluecapture/bronze.py`).
+- **Value Drivers required**: for any project type other than `POC`, at least one value driver is required (validated in `python-lib/intake/payload.py`).
+- **Hub bronze dataset creation requires a connection**: managed dataset creation may require an explicit connection; the plugin infers one and falls back to `filesystem_managed` (see `python-lib/intake/bronze.py`).
 
 ## Running the local harness
 

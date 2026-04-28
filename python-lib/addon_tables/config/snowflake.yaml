@@ -3,4 +3,4 @@
 - warehouse: warehouse
 - db: db
 - role: role
-- schema: schema
+- defaultSchema: defaultSchema

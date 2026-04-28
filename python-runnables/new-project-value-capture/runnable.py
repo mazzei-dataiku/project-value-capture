@@ -11,11 +11,7 @@ from helpers.client_builder import (
 from intake.new_project import create_project_with_fallback, ensure_hub_project
 from intake.bronze import append_row, ensure_managed_dataset
 from intake.payload import INTAKE_VERSION, normalize_payload, to_json_str, utc_now_iso
-from intake.snowflake_vars import (
-    extract_variable_name,
-    is_variable_token,
-    read_snowflake_mapping_rows,
-)
+from intake.snowflake_vars import extract_variable_name, is_variable_token
 
 
 class MyRunnable(Runnable):
@@ -85,8 +81,12 @@ class MyRunnable(Runnable):
                 for row in payload.snowflake_rows:
                     if not isinstance(row, dict) or not row.get("use"):
                         continue
-                    for field in ["warehouse", "database", "role", "schema"]:
-                        cell = row.get(field) or {}
+
+                    cells = row.get("cells")
+                    if not isinstance(cells, dict):
+                        continue
+
+                    for cell in cells.values():
                         if not isinstance(cell, dict) or not cell.get("editable"):
                             continue
 
@@ -113,69 +113,40 @@ class MyRunnable(Runnable):
         if project_type == "POC":
             return {"projectKey": self.project_key, "status": "created", "logged": False}
 
-        # Optional: write Snowflake variables into the created project's global variables.
+        # Optional: write connection variables into the created project's global variables.
+        # This is connection-agnostic: variable keys come from ${VAR} templates.
         if payload.snowflake_enabled:
-            # Re-read mapping dataset in the hub project.
-            plugin_cfg = getattr(self, "plugin_config", {}) or {}
-            mapping_dataset_name = None
-            if isinstance(plugin_cfg, dict):
-                mapping_dataset_name = plugin_cfg.get("snowflake_vars_dataset_name")
-            if not isinstance(mapping_dataset_name, str) or not mapping_dataset_name.strip():
-                mapping_dataset_name = "snowflake_connnection_vars_map"
-
-            try:
-                mapping_ds = hub_project.get_dataset(mapping_dataset_name)
-                mapping_rows = {
-                    r.connection_name.strip().lower(): {
-                        "warehouse": r.warehouse,
-                        "database": r.database,
-                        "role": r.role,
-                        "schema": r.schema,
-                    }
-                    for r in read_snowflake_mapping_rows(mapping_ds)
-                    if isinstance(r.connection_name, str) and r.connection_name.strip()
-                }
-            except Exception as e:
-                raise ValueError(
-                    "Snowflake variables are enabled but the mapping dataset could not be read. "
-                    f"Underlying error: {e}"
-                )
-
             update: dict[str, str] = {}
+
             for row in payload.snowflake_rows:
                 if not isinstance(row, dict) or not row.get("use"):
                     continue
 
-                connection_name = row.get("connection_name")
-                if not isinstance(connection_name, str) or not connection_name.strip():
+                cells = row.get("cells")
+                if not isinstance(cells, dict):
                     continue
 
-                mapping = mapping_rows.get(connection_name.strip().lower())
-                if not isinstance(mapping, dict):
-                    continue
-
-                for field in ["warehouse", "database", "role", "schema"]:
-                    token = mapping.get(field)
-                    if not is_variable_token(token):
+                for cell in cells.values():
+                    if not isinstance(cell, dict) or not cell.get("editable"):
                         continue
 
-                    cell = row.get(field) or {}
-                    if not isinstance(cell, dict) or not cell.get("editable"):
+                    template = cell.get("template")
+                    if not is_variable_token(template):
                         continue
 
                     value = cell.get("value")
                     if not isinstance(value, str):
-                        value = ""
+                        continue
                     value = value.strip()
 
+                    # Skip blanks (user may rely on existing defaults/profile).
                     if not value:
-                        # schema is optional; others were validated in normalize_payload
                         continue
 
-                    var_name = extract_variable_name(str(token))
+                    var_name = extract_variable_name(str(template))
                     if var_name in update:
                         raise ValueError(
-                            f"Snowflake variable conflict for {var_name}. "
+                            f"Connection variable conflict for {var_name}. "
                             "Multiple selected connections map to the same variable key."
                         )
                     update[var_name] = value
@@ -185,7 +156,7 @@ class MyRunnable(Runnable):
                     project_handle.update_variables(update, type="standard")
                 except Exception as e:
                     raise ValueError(
-                        "Failed to write Snowflake variables to the created project's global variables. "
+                        "Failed to write connection variables to the created project's global variables. "
                         f"Underlying error: {e}"
                     )
 

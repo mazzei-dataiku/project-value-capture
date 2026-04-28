@@ -210,31 +210,16 @@
                             <tr>
                                 <th>Use?</th>
                                 <th>Connection</th>
-                                <th>Warehouse</th>
-                                <th>Database</th>
-                                <th>Role</th>
-                                <th>Schema</th>
+                                <th ng-repeat="c in snowflake_columns track by $index">{{c}}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat="r in config.snowflakeRows track by $index">
                                 <td style="text-align:center;"><input type="checkbox" ng-model="r.use" ng-change="recomputeDerived()"></td>
                                 <td>{{r.connection_name}}</td>
-                                <td>
-                                    <input type="text" ng-if="r.warehouse.editable" ng-model="r.warehouse.value" placeholder="Enter warehouse" ng-change="recomputeDerived()">
-                                    <span ng-if="!r.warehouse.editable">{{r.warehouse.value}}</span>
-                                </td>
-                                <td>
-                                    <input type="text" ng-if="r.database.editable" ng-model="r.database.value" placeholder="Enter database" ng-change="recomputeDerived()">
-                                    <span ng-if="!r.database.editable">{{r.database.value}}</span>
-                                </td>
-                                <td>
-                                    <input type="text" ng-if="r.role.editable" ng-model="r.role.value" placeholder="Enter role" ng-change="recomputeDerived()">
-                                    <span ng-if="!r.role.editable">{{r.role.value}}</span>
-                                </td>
-                                <td>
-                                    <input type="text" ng-if="r.schema.editable" ng-model="r.schema.value" placeholder="Enter schema (optional)" ng-change="recomputeDerived()">
-                                    <span ng-if="!r.schema.editable">{{r.schema.value}}</span>
+                                <td ng-repeat="c in snowflake_columns track by $index">
+                                    <input type="text" ng-if="r.cells[c].editable" ng-model="r.cells[c].value" placeholder="Enter value" ng-change="recomputeDerived()">
+                                    <span ng-if="!r.cells[c].editable">{{r.cells[c].value}}</span>
                                 </td>
                             </tr>
                         </tbody>

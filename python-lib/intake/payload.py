@@ -124,22 +124,19 @@ def _normalize_snowflake_rows(value: Any) -> list[dict[str, Any]]:
         use = item.get("use")
         use_bool = use if isinstance(use, bool) else False
 
-        def _cell(name: str) -> dict[str, Any]:
-            cell = item.get(name)
-            if isinstance(cell, dict):
-                return cell
-            return {}
+        cells = item.get("cells")
+        if not isinstance(cells, dict):
+            cells = {}
 
-        out.append(
-            {
-                "connection_name": connection_name.strip(),
-                "use": use_bool,
-                "warehouse": _cell("warehouse"),
-                "database": _cell("database"),
-                "role": _cell("role"),
-                "schema": _cell("schema"),
-            }
-        )
+        # Keep only dict-like cells
+        norm_cells: dict[str, dict[str, Any]] = {}
+        for col, cell in cells.items():
+            if not isinstance(col, str) or not col.strip():
+                continue
+            if isinstance(cell, dict):
+                norm_cells[col.strip()] = cell
+
+        out.append({"connection_name": connection_name.strip(), "use": use_bool, "cells": norm_cells})
 
     return out
 
@@ -226,22 +223,10 @@ def normalize_payload(config: dict[str, Any], plugin_config: dict[str, Any] | No
         problem_statement = problem_statement or ""
         solution_description = solution_description or ""
 
+    # For connection variables: allow blanks.
+    # Users may rely on existing defaults (or user profile load).
     if snowflake_enabled:
-        selected = [r for r in snowflake_rows if r.get("use") is True]
-        for r in selected:
-            cn = r.get("connection_name")
-            for field in ["warehouse", "database", "role"]:
-                cell = r.get(field) or {}
-                editable = bool(cell.get("editable"))
-                if not editable:
-                    continue
-                value = cell.get("value")
-                if not isinstance(value, str) or not value.strip():
-                    raise ValueError(
-                        f"Snowflake {field} is required for connection {cn}. Please fix to proceed."
-                    )
-
-        # schema is optional even if editable
+        pass
 
     return NormalizedPayload(
         project_name=project_name,

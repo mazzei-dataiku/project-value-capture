@@ -35,7 +35,8 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
     $scope.snowflake_warning = '';
 
     $scope.config.useSnowflakeVars = $scope.config.useSnowflakeVars || false;
-    $scope.config.loadSnowflakeFromProfile = $scope.config.loadSnowflakeFromProfile || false;
+     $scope.config.loadSnowflakeFromProfile = false;
+
     $scope.config.saveSnowflakeToProfile = $scope.config.saveSnowflakeToProfile || false;
     $scope.config.snowflakeRows = $scope.config.snowflakeRows || [];
 
@@ -116,55 +117,57 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
         return m ? m[1] : null;
     }
 
-    function applySnowflakeProfileDefaults(defaults) {
-        let vars = (defaults && defaults.vars && typeof defaults.vars === 'object') ? defaults.vars : {};
+     function applySnowflakeProfileDefaults(defaults) {
+         let vars = (defaults && defaults.vars && typeof defaults.vars === 'object') ? defaults.vars : {};
 
-        ($scope.config.snowflakeRows || []).forEach(function(r) {
-            if (!r) {
-                return;
-            }
+         ($scope.config.snowflakeRows || []).forEach(function(r) {
+             if (!r || !r.cells) {
+                 return;
+             }
 
-            ['warehouse', 'database', 'role', 'schema'].forEach(function(field) {
-                let cell = r[field];
-                if (!cell || !cell.editable) {
-                    return;
-                }
+             Object.keys(r.cells).forEach(function(col) {
+                 let cell = r.cells[col];
+                 if (!cell || !cell.editable) {
+                     return;
+                 }
 
-                let varName = extractVarName(cell.template);
-                if (!varName) {
-                    return;
-                }
+                 let varName = extractVarName(cell.template);
+                 if (!varName) {
+                     return;
+                 }
 
-                let v = vars[varName];
-                if (typeof v === 'string') {
-                    cell.value = v;
-                }
-            });
-        });
-    }
+                 let v = vars[varName];
+                 if (typeof v === 'string') {
+                     cell.value = v;
+                 }
+             });
+         });
+     }
+
 
     $scope.loadSnowflakeFromProfile = function() {
         if (!$scope.config.useSnowflakeVars) {
             return;
         }
-        let varNames = [];
-        let seen = {};
-        ($scope.config.snowflakeRows || []).forEach(function(r) {
-            if (!r) {
-                return;
-            }
-            ['warehouse', 'database', 'role', 'schema'].forEach(function(field) {
-                let cell = r[field];
-                if (!cell || !cell.editable) {
-                    return;
-                }
-                let varName = extractVarName(cell.template);
-                if (varName && !seen[varName]) {
-                    seen[varName] = true;
-                    varNames.push(varName);
-                }
-            });
-        });
+         let varNames = [];
+         let seen = {};
+         ($scope.config.snowflakeRows || []).forEach(function(r) {
+             if (!r || !r.cells) {
+                 return;
+             }
+             Object.keys(r.cells).forEach(function(col) {
+                 let cell = r.cells[col];
+                 if (!cell || !cell.editable) {
+                     return;
+                 }
+                 let varName = extractVarName(cell.template);
+                 if (varName && !seen[varName]) {
+                     seen[varName] = true;
+                     varNames.push(varName);
+                 }
+             });
+         });
+
 
         $scope.callPythonDo({action: 'snowflake_profile', var_names: varNames}).then(function(data) {
             if (data && data.profile_warning) {
@@ -235,31 +238,34 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
         $scope.callPythonDo({action: 'snowflake'}).then(function(data) {
             $scope.enable_snowflake_vars = !!data.enable_snowflake_vars;
             $scope.snowflake_warning = data.snowflake_warning || '';
+
+            $scope.snowflake_columns = Array.isArray(data.snowflake_columns) ? data.snowflake_columns : [];
             $scope.snowflake_rows = data.snowflake_rows || [];
 
-            $scope.config.snowflakeRows = ($scope.snowflake_rows || []).map(function(r) {
-                function initCell(templateValue) {
-                    let template = (templateValue || '').toString();
-                    if (isVarToken(template)) {
-                        return { template: template, value: '', editable: true };
-                    }
-                    return { template: template, value: template, editable: false };
+            function initCell(templateValue) {
+                let template = (templateValue === null || templateValue === undefined) ? '' : ('' + templateValue);
+                if (isVarToken(template)) {
+                    return { template: template, value: '', editable: true };
                 }
+                return { template: template, value: template, editable: false };
+            }
+
+            $scope.config.snowflakeRows = ($scope.snowflake_rows || []).map(function(r) {
+                let values = (r && r.values && typeof r.values === 'object') ? r.values : {};
+                let cells = {};
+                ($scope.snowflake_columns || []).forEach(function(col) {
+                    cells[col] = initCell(values[col]);
+                });
 
                 return {
                     use: false,
                     connection_name: r.connection_name,
-                    warehouse: initCell(r.warehouse),
-                    database: initCell(r.database),
-                    role: initCell(r.role),
-                    schema: initCell(r.schema),
+                    cells: cells
                 };
             });
 
-            if ($scope.config.loadSnowflakeFromProfile) {
-                $scope.loadSnowflakeFromProfile();
-                return;
-            }
+             // loadSnowflakeFromProfile is now a button-triggered action.
+
 
             recomputeDerived();
         }, function(err) {
@@ -439,27 +445,16 @@ app.controller('ProjectValueCaptureParamsController', ['$scope', function($scope
                 }
             }
 
-            // Snowflake vars validation (only when enabled + opted-in)
+            // Connection vars validation (only when enabled + opted-in)
+            // Do not require editable fields: user may rely on existing defaults/profile.
             if ($scope.enable_snowflake_vars && $scope.config.useSnowflakeVars) {
                 let rows = $scope.config.snowflakeRows || [];
                 let selected = rows.filter(function(r) { return r && r.use; });
                 selected.forEach(function(r) {
-                    let cn = r.connection_name || '';
-
-                    function requireField(cell, label) {
-                        if (!cell || !cell.editable) {
-                            return;
-                        }
-                        let v = (cell.value || '').toString().trim();
-                        if (!v) {
-                            errors.push('Snowflake ' + label + ' is required for ' + cn + '.');
-                        }
+                    if (!r || !r.cells) {
+                        return;
                     }
-
-                    requireField(r.warehouse, 'warehouse');
-                    requireField(r.database, 'database');
-                    requireField(r.role, 'role');
-                    // schema is optional
+                    // No hard validation: blanks are allowed.
                 });
             }
         }

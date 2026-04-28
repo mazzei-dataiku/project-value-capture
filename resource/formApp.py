@@ -10,8 +10,8 @@ from intake.snowflake_vars import (
     SNOWFLAKE_MAPPING_DATASET_DEFAULT,
     extract_variable_name,
     is_variable_token,
-    read_snowflake_mapping_rows,
 )
+from intake.hub_mapping import read_hub_mapping_dataset
 from intake.form_choices import build_form_choices_response
 
 
@@ -132,9 +132,9 @@ def do(payload, config, plugin_config, inputs):
                 }
 
             mapping_ds = hub_project.get_dataset(dataset_name)
-            mapping_rows = read_snowflake_mapping_rows(mapping_ds)
+            mapping_table = read_hub_mapping_dataset(mapping_ds)
 
-            if not mapping_rows:
+            if not mapping_table.rows:
                 return {
                     "enable_snowflake_vars": True,
                     "snowflake_rows": [],
@@ -151,21 +151,13 @@ def do(payload, config, plugin_config, inputs):
             }
 
             out_rows = []
-            for r in mapping_rows:
-                key = r.connection_name.strip().lower()
+            for r in mapping_table.rows:
+                key = str(r.get("connection_name") or "").strip().lower()
                 if key in visible_by_lower:
-                    out_rows.append(
-                        {
-                            "connection_name": visible_by_lower[key],
-                            "warehouse": r.warehouse,
-                            "database": r.database,
-                            "role": r.role,
-                            "schema": r.schema,
-                        }
-                    )
+                    out_rows.append({"connection_name": visible_by_lower[key], "values": r})
 
             if not out_rows:
-                mapped = sorted({r.connection_name for r in mapping_rows if r.connection_name})
+                mapped = sorted({str(r.get("connection_name") or "").strip() for r in mapping_table.rows})
                 return {
                     "enable_snowflake_vars": True,
                     "snowflake_rows": [],
@@ -176,7 +168,11 @@ def do(payload, config, plugin_config, inputs):
                     ),
                 }
 
-            return {"enable_snowflake_vars": True, "snowflake_rows": out_rows}
+            return {
+                "enable_snowflake_vars": True,
+                "snowflake_columns": mapping_table.columns,
+                "snowflake_rows": out_rows,
+            }
 
         except Exception as e:
             # Make sure the UI always gets a response it can render.

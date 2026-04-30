@@ -11,7 +11,14 @@ def get_plugin_version() -> str:
 
 def bronze_schema_columns() -> list[dict[str, str]]:
     # Keep types to basic scalar types for portability.
+    #
+    # Note: intake is append-only. Rollbacks are represented by a later row with
+    # the same `intake_run_id` and `intake_status="REVERTED"`.
     return [
+        {"name": "intake_run_id", "type": "string"},
+        {"name": "intake_status", "type": "string"},
+        {"name": "hook_runnable_type", "type": "string"},
+        {"name": "hook_error", "type": "string"},
         {"name": "project_key", "type": "string"},
         {"name": "project_name", "type": "string"},
         {"name": "created_at", "type": "string"},
@@ -157,3 +164,26 @@ def append_row(dataset, row: dict[str, Any]) -> None:
     core = dataset.get_as_core_dataset()
     core.spec_item["appendMode"] = True
     core.write_with_schema(pd.DataFrame([row]))
+
+
+def append_status(
+    dataset,
+    *,
+    intake_run_id: str,
+    intake_status: str,
+    base_row: dict[str, Any],
+    hook_runnable_type: str = "",
+    hook_error: str = "",
+) -> None:
+    """Append a status row for an existing intake_run_id.
+
+    The intake table is treated as append-only to avoid read/modify/write races.
+    Consumers should group by intake_run_id and use the latest created_at.
+    """
+
+    row = dict(base_row)
+    row["intake_run_id"] = intake_run_id
+    row["intake_status"] = intake_status
+    row["hook_runnable_type"] = hook_runnable_type
+    row["hook_error"] = hook_error
+    append_row(dataset, row)

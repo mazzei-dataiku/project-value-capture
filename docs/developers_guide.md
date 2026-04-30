@@ -12,7 +12,7 @@ This repository contains a Dataiku DSS plugin that provides a runnable (macro) w
 - `python-lib/`: shared helper code (importable in DSS plugin runtime).
   - `python-lib/intake/form_choices.py`: maps plugin settings → UI choice lists.
   - `python-lib/intake/payload.py`: normalizes & validates submitted form payload.
-  - `python-lib/intake/bronze.py`: creates/appends to the hub “bronze” intake log dataset.
+  - `python-lib/intake/bronze.py`: creates/appends to the hub “bronze” intake log dataset (including custom hook rollback statuses).
 - `unit_testing/new-project-value-capture.py`: minimal local harness to instantiate and run the runnable.
 
 ## Plugin settings
@@ -29,6 +29,12 @@ APM ID can be made conditionally visible/required depending on the selected Proj
 ### Snowflake variables (optional)
 
 If `enable_snowflake_vars` is enabled, the form can optionally prompt for Snowflake connection variables and write them to the created project's global variables (`standard`).
+
+### Custom hook macro (optional)
+
+If `enable_custom_hook` is enabled, the macro will run a customer-provided hook macro **inside the newly created project**. If the hook fails, the macro will revert by deleting the created project and appending a `REVERTED` status row in the intake dataset.
+
+See `docs/custom_hook_macro.md` for full usage and recommended hook return payload fields.
 
 - The mapping is read from a hub project dataset (`snowflake_vars_dataset_name`, default `snowflake_connnection_vars_map`).
 - Expected columns: any columns are supported; a connection identifier column is required (`connection_name` preferred; fallback `connection` or `name`).

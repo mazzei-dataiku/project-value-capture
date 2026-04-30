@@ -310,6 +310,42 @@
             "mandatory": false,
             "defaultValue": "snowflake_connnection_vars_map",
             "visibilityCondition": "model.enable_snowflake_vars"
+        },
+        
+
+
+        
+        {
+            "name": "sep_custom_hook",
+            "label": "",
+            "description": "<hr color='#000000' size='2' noshade><h3>Custom Hook Macro (Optional)</h3>",
+            "type": "SEPARATOR"
+        },
+        {
+            "name": "enable_custom_hook",
+            "label": "Enable Custom Hook",
+            "type": "BOOLEAN",
+            "description": "If enabled, the macro will run a customer-provided hook macro inside the newly created project. If the hook fails, the macro will revert by deleting the created project and marking the intake row as REVERTED.",
+            "mandatory": false,
+            "defaultValue": false
+        },
+        {
+            "name": "custom_hook_runnable_type",
+            "label": "Custom Hook Runnable Type",
+            "type": "STRING",
+            "description": "Full runnable type identifier of the hook macro to run (example: pyrunnable_instance-insights_project-advisor).",
+            "mandatory": false,
+            "defaultValue": "",
+            "visibilityCondition": "model.enable_custom_hook"
+        },
+        {
+            "name": "custom_hook_include_poc",
+            "label": "Run Hook For POC",
+            "type": "BOOLEAN",
+            "description": "If enabled, runs the custom hook for POC projects as well. Note: POC projects are still not logged to the intake dataset.",
+            "mandatory": false,
+            "defaultValue": false,
+            "visibilityCondition": "model.enable_custom_hook"
         }
     ]
 }
